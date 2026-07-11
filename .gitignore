@@ -1,0 +1,30 @@
+# Rust / Cargo build artifacts
+target/
+Cargo.lock.bak
+
+# Meson build directory
+build/
+_build/
+builddir/
+
+# Auto-generated config
+src/config.rs
+
+# Flatpak / packaging artifacts
+.flatpak-builder/
+*.flatpak
+
+# Blueprint-compiler (fetched at build time via subproject)
+subprojects/blueprint-compiler/
+
+# Misc editor / OS artifacts
+*.json~
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Log/scratch files
+run_output.log
+refactor_output.md
+test_clone.rs

@@ -1,0 +1,48 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-FileCopyrightText: 2025 Emmanuele Bassi
+
+using Gtk 4.0;
+
+template $AmberolPlaybackControl: Widget {
+  Box center_box {
+    orientation: horizontal;
+    halign: start;
+    valign: center;
+    spacing: 16;
+
+    ToggleButton shuffle_button {
+      label: _("Shuffle");
+      action-name: "queue.shuffle";
+      valign: center;
+      styles ["flat", "ember-control-button"]
+    }
+
+    Button previous_button {
+      label: _("Backward");
+      action-name: "win.previous";
+      valign: center;
+      styles ["flat", "ember-control-button"]
+    }
+
+    Button play_button {
+      label: _("Play");
+      action-name: "win.play";
+      valign: center;
+      styles ["flat", "ember-control-button"]
+    }
+
+    Button next_button {
+      label: _("Forward");
+      action-name: "win.next";
+      valign: center;
+      styles ["flat", "ember-control-button"]
+    }
+
+    Button repeat_button {
+      label: _("Repeat");
+      action-name: "queue.repeat-mode";
+      valign: center;
+      styles ["flat", "ember-control-button"]
+    }
+  }
+}

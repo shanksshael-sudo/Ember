@@ -1,0 +1,45 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+using Gtk 4.0;
+
+template $AmberolLyricsView: Widget {
+  Overlay overlay {
+    vexpand: true;
+    hexpand: true;
+
+    child: ScrolledWindow scrolled_window {
+      hscrollbar-policy: never;
+      vscrollbar-policy: never;
+      vexpand: true;
+      hexpand: true;
+      min-content-height: 200;
+      propagate-natural-height: false;
+      propagate-natural-width: false;
+      styles ["lyrics-scroll-container"]
+
+      child: Box lyrics_box {
+         orientation: vertical;
+         spacing: 12;
+         halign: center;
+         margin-top: 60;
+         margin-bottom: 250;
+      };
+    };
+
+    [overlay]
+    Box {
+       valign: start;
+       height-request: 65;
+       styles ["top-fade-overlay"]
+       can-target: false;
+    }
+
+    [overlay]
+    Box {
+       valign: end;
+       height-request: 65;
+       styles ["bottom-fade-overlay"]
+       can-target: false;
+    }
+  }
+}

@@ -1,0 +1,138 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-FileCopyrightText: 2025 Emmanuele Bassi
+
+using Gtk 4.0;
+
+template $AmberolQueueRow : Widget {
+  Stack row_stack {
+    StackPage {
+      name: "song-details";
+
+      child: Box {
+        margin-top: 10;
+        margin-bottom: 10;
+        margin-start: 32;
+        margin-end: 32;
+        spacing: 16;
+        styles ["ember-queue-row"]
+
+        Stack song_cover_stack {
+          width-request: 48;
+          height-request: 48;
+
+          StackPage {
+            name: "no-cover";
+
+            child: Image {
+              icon-name: "folder-music-symbolic";
+              pixel-size: 48;
+              styles ["ember-row-nocover"]
+
+              accessibility {
+                label: C_("a11y", "No cover available");
+              }
+            };
+          }
+
+          StackPage {
+            name: "cover";
+
+            child: $AmberolCoverPicture song_cover_image {
+              cover-size: "1";
+              halign: center;
+              valign: center;
+              width-request: 48;
+              height-request: 48;
+              styles ["ember-row-cover"]
+            };
+          }
+        }
+
+        Box {
+          orientation: vertical;
+          valign: center;
+          hexpand: true;
+          spacing: 3;
+
+          Inscription song_title_label {
+            xalign: 0;
+            text-overflow: ellipsize_end;
+            nat-chars: 30;
+            styles ["ember-row-title"]
+          }
+
+          Inscription song_artist_label {
+            xalign: 0;
+            text-overflow: ellipsize_end;
+            nat-chars: 30;
+            styles ["ember-row-artist"]
+          }
+        }
+
+        [end]
+        Image song_playing_image {
+          icon-name: "audio-volume-medium-symbolic";
+          pixel-size: 16;
+          halign: center;
+          valign: center;
+          opacity: 0;
+          styles ["ember-playing-icon"]
+
+          accessibility {
+            label: C_("a11y", "Currently playing");
+          }
+        }
+      };
+    }
+
+    StackPage {
+      name: "selection-mode";
+
+      child: Box {
+        margin-top: 10;
+        margin-bottom: 10;
+        margin-start: 32;
+        margin-end: 32;
+        spacing: 16;
+        styles ["ember-queue-row"]
+
+        CheckButton selected_button {
+          halign: center;
+          valign: center;
+          styles ["selection-mode"]
+        }
+
+        Box {
+          orientation: vertical;
+          valign: center;
+          hexpand: true;
+          spacing: 3;
+
+          Inscription selection_title_label {
+            xalign: 0;
+            text-overflow: ellipsize_end;
+            nat-chars: 30;
+            styles ["ember-row-title"]
+          }
+
+          Inscription selection_artist_label {
+            xalign: 0;
+            text-overflow: ellipsize_end;
+            nat-chars: 30;
+            styles ["ember-row-artist"]
+          }
+        }
+
+        [end]
+        Image selection_playing_image {
+          icon-name: "audio-volume-medium-symbolic";
+          pixel-size: 16;
+          halign: center;
+          valign: center;
+          opacity: 0;
+          styles ["ember-playing-icon"]
+        }
+      };
+    }
+  }
+}

@@ -1,0 +1,101 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-FileCopyrightText: 2025 Emmanuele Bassi
+
+using Gtk 4.0;
+
+template $AmberolPlaylistView : Widget {
+  Box {
+    orientation: vertical;
+    hexpand: true;
+    vexpand: true;
+    styles ["ember-archive-list-container"]
+
+    // Archive header
+    Box {
+      visible: false;
+      orientation: horizontal;
+      margin-top: 24;
+      margin-bottom: 0;
+      margin-start: 32;
+      margin-end: 32;
+      spacing: 12;
+
+      Label {
+        label: _("ARCHIVE");
+        hexpand: true;
+        halign: start;
+        styles ["ember-archive-header"]
+      }
+
+      Label queue_length_label {
+        halign: end;
+        styles ["ember-queue-length"]
+      }
+
+      ToggleButton search_button {
+        icon-name: "system-search-symbolic";
+        action-name: "queue.search";
+        valign: center;
+        tooltip-text: _("Search");
+        styles ["ember-icon-button"]
+      }
+    }
+
+    SearchBar playlist_searchbar {
+      margin-start: 32;
+      margin-end: 32;
+      margin-top: 8;
+
+      child: SearchEntry playlist_searchentry {
+        placeholder-text: _("Search tracks…");
+        hexpand: true;
+      };
+    }
+
+    Overlay {
+      vexpand: true;
+
+      ScrolledWindow {
+        vexpand: true;
+        hscrollbar-policy: never;
+        vscrollbar-policy: automatic;
+
+        child: ListView queue_view {
+          styles ["ember-archive-listview"]
+        };
+      }
+
+      [overlay]
+      ProgressBar playlist_progress {
+        valign: start;
+        visible: false;
+        styles ["ember-load-progress"]
+      }
+    }
+
+    ActionBar queue_actionbar {
+      revealed: false;
+
+      Button queue_select_all_button {
+        icon-name: "edit-select-all-symbolic";
+      }
+
+      [center]
+      Label queue_selected_label {
+        styles ["caption"]
+      }
+
+      [end]
+      Button queue_remove_button {
+        icon-name: "app-remove-symbolic";
+      }
+    }
+
+    // hidden back button required by Rust
+    Button back_button {
+      visible: false;
+      icon-name: "go-previous-symbolic";
+      action-name: "queue.toggle";
+    }
+  }
+}

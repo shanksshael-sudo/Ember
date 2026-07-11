@@ -1,0 +1,596 @@
+/* ============================================================
+   EMBER — GTK4 CSS Theme
+   Pure black / electric cyan / Audiowide + Inter typography
+   Target: GTK 4 + libadwaita, loaded via gtk::CssProvider
+   ============================================================ */
+
+/* ── Font imports (via @import not available in GTK CSS; fonts
+      must be installed system-wide: Audiowide and Inter)       */
+
+/* ── CSS Variables ─────────────────────────────────────────── */
+:root {
+  --ember-black:       #000000;
+  --ember-surface:     #0a0a0a;
+  --ember-surface-2:   #111111;
+  --ember-border:      #1e1e1e;
+  --ember-border-hi:   #2a2a2a;
+  --ember-cyan:        #00ffff;
+  --ember-cyan-dim:    rgba(0, 255, 255, 0.12);
+  --ember-cyan-glow:   rgba(0, 255, 255, 0.35);
+  --ember-white:       #ffffff;
+  --ember-white-dim:   rgba(255, 255, 255, 0.55);
+  --ember-white-faint: rgba(255, 255, 255, 0.20);
+  --ember-playing-red: #ff4466;
+}
+
+/* ── Global Reset ───────────────────────────────────────────── */
+* {
+  font-family: "Audiowide", monospace;
+  outline-offset: 0;
+}
+
+window,
+window.background,
+.background {
+  background-color: var(--ember-black);
+  color: var(--ember-cyan);
+  background-image: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* Kill all AdwHeaderBar / title bars */
+headerbar,
+.titlebar,
+adw-header-bar,
+.top-bar {
+  min-height: 0;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+/* ── Typography utilities ──────────────────────────────────── */
+.ember-logotype {
+  font-family: "Audiowide", monospace;
+  font-size: 72px;
+  font-weight: 400;
+  color: var(--ember-cyan);
+  letter-spacing: 16px;
+  text-shadow: 0 0 40px var(--ember-cyan-glow),
+               0 0 80px rgba(0, 255, 255, 0.15);
+}
+
+.ember-tagline {
+  font-family: "Audiowide", monospace;
+  font-size: 14px;
+  font-weight: 300;
+  color: var(--ember-white-faint);
+  letter-spacing: 6px;
+  text-transform: uppercase;
+}
+
+/* ── Initial view buttons ───────────────────────────────────── */
+.ember-button-primary {
+  font-family: "Audiowide", monospace;
+  font-size: 13px;
+  background-color: transparent;
+  color: var(--ember-cyan);
+  border: 1px solid var(--ember-cyan);
+  border-radius: 0;
+  padding: 12px 36px;
+  transition: background-color 200ms ease,
+              box-shadow 200ms ease;
+}
+
+.ember-button-primary:hover {
+  background-color: var(--ember-cyan-dim);
+  box-shadow: 0 0 16px var(--ember-cyan-glow),
+              inset 0 0 16px var(--ember-cyan-dim);
+}
+
+.ember-button-secondary {
+  font-family: "Audiowide", monospace;
+  font-size: 13px;
+  background-color: transparent;
+  color: var(--ember-white-dim);
+  border: 1px solid var(--ember-border-hi);
+  border-radius: 0;
+  padding: 12px 36px;
+  transition: border-color 200ms ease,
+              color 200ms ease;
+}
+
+.ember-button-secondary:hover {
+  border-color: var(--ember-white-dim);
+  color: var(--ember-white);
+}
+
+/* ── Nav buttons (ARCHIVE, icon buttons) ───────────────────── */
+.ember-nav-button {
+  font-family: "Audiowide", monospace;
+  font-size: 14px;
+  letter-spacing: 2px;
+  color: var(--ember-cyan);
+  background-color: transparent;
+  background-image: none;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 8px 0;
+  text-decoration: none;
+  text-shadow: 0 0 5px rgba(0, 255, 255, 0.2);
+  transition: text-shadow 200ms ease, text-decoration 200ms ease;
+}
+
+.ember-nav-button:hover {
+  text-decoration: underline;
+  text-shadow: 0 0 12px var(--ember-cyan-glow);
+  background-color: transparent;
+}
+
+.ember-icon-button {
+  background-color: transparent;
+  color: var(--ember-white-dim);
+  border: none;
+  border-radius: 0;
+  padding: 8px;
+  min-width: 36px;
+  min-height: 36px;
+  transition: color 200ms ease;
+}
+
+.ember-icon-button:hover,
+.ember-icon-button:checked {
+  color: var(--ember-cyan);
+}
+
+/* ── Archive page ───────────────────────────────────────────── */
+.ember-archive-page {
+  background-color: var(--ember-black);
+}
+
+.ember-archive-list-container {
+  background-color: var(--ember-black);
+}
+
+.ember-archive-header {
+  font-family: "Audiowide", monospace;
+  font-size: 11px;
+  letter-spacing: 5px;
+  color: var(--ember-cyan);
+}
+
+.ember-queue-length {
+  font-family: "Audiowide", monospace;
+  font-size: 12px;
+  color: var(--ember-white-faint);
+}
+
+.ember-load-progress {
+  color: var(--ember-cyan);
+}
+
+/* ListView container – no background chrome */
+.ember-archive-listview {
+  background-color: transparent;
+  border: none;
+}
+
+.ember-archive-listview > row {
+  background-color: transparent;
+  border-bottom: 1px solid var(--ember-border);
+  padding: 0;
+  transition: background-color 150ms ease;
+}
+
+.ember-archive-listview > row:hover {
+  background-color: var(--ember-surface);
+}
+
+.ember-archive-listview > row:selected {
+  background-color: var(--ember-surface-2);
+  border-bottom-color: var(--ember-cyan);
+}
+
+/* Track row content */
+.ember-queue-row {
+  background-color: transparent;
+}
+
+.ember-row-cover {
+  border-radius: 2px;
+}
+
+.ember-row-nocover {
+  color: var(--ember-border-hi);
+}
+
+.ember-row-title {
+  font-family: "Audiowide", monospace;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ember-white);
+}
+
+.ember-row-artist {
+  font-family: "Audiowide", monospace;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--ember-white-dim);
+}
+
+.ember-playing-icon {
+  color: var(--ember-cyan);
+}
+
+/* Playing row highlight */
+.ember-archive-listview > row.playing .ember-row-title {
+  color: var(--ember-cyan);
+}
+
+/* ── Stack page transitions ─────────────────────────────────── */
+stack {
+  transition: none;
+}
+
+/* ── Now Playing page ───────────────────────────────────────── */
+.ember-now-playing-page {
+  background-color: var(--ember-black);
+}
+
+/* Vinyl art container — the left half panel */
+.ember-vinyl-container {
+  background-color: var(--ember-black);
+}
+
+/* Shift the vinyl leftward so it bleeds into the left margin */
+.ember-vinyl-shifted {
+  /* no negative margin — disc is drawn at cx=0, window clips the left half naturally */
+}
+
+/* The album art image, circular */
+.ember-vinyl-cover,
+.ember-vinyl-art picture,
+.ember-vinyl-art .album-art {
+  border-radius: 50%;
+  box-shadow: 0 8px 60px rgba(0, 0, 0, 0.9),
+              0 0 0 1px var(--ember-border);
+}
+
+/* Placeholder icon when no art available */
+.ember-vinyl-placeholder {
+  color: var(--ember-border-hi);
+}
+
+/* Metadata block */
+.ember-song-details {
+  background-color: transparent;
+}
+
+.ember-np-title {
+  font-family: "Audiowide", monospace;
+  font-size: 28px;
+  font-weight: 400;
+  color: var(--ember-white);
+  margin-bottom: 8px;
+}
+
+.ember-np-artist {
+  font-family: "Audiowide", monospace;
+  font-size: 18px;
+  font-weight: 300;
+  color: var(--ember-cyan);
+}
+
+.ember-np-album {
+  font-family: "Audiowide", monospace;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--ember-white-faint);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* Time labels */
+.ember-time-label {
+  font-family: "Audiowide", monospace;
+  font-size: 12px;
+  font-weight: 300;
+  color: var(--ember-white-faint);
+  letter-spacing: 1px;
+}
+
+/* Volume slider */
+.ember-vol-icon {
+  color: var(--ember-white-faint);
+}
+
+.ember-volume-slider {
+  background-color: transparent;
+  color: var(--ember-cyan);
+}
+
+.ember-volume-slider trough {
+  background-color: var(--ember-border);
+  border-radius: 0;
+  min-height: 2px;
+}
+
+.ember-volume-slider trough highlight {
+  background-color: var(--ember-cyan);
+}
+
+.ember-volume-slider slider {
+  background-color: var(--ember-cyan);
+  border-radius: 50%;
+  border: none;
+  box-shadow: 0 0 6px var(--ember-cyan-glow);
+}
+
+/* Playback control transport buttons */
+button.flat.circular {
+  background-color: transparent;
+  color: var(--ember-white-dim);
+  border: none;
+  border-radius: 50%;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 8px;
+  transition: color 200ms ease,
+              background-color 200ms ease;
+}
+
+button.flat.circular:hover {
+  color: var(--ember-white);
+  background-color: var(--ember-surface);
+}
+
+/* Play/pause button — cyan ring border */
+button.flat.circular.large {
+  color: var(--ember-cyan);
+  border: 2px solid var(--ember-cyan);
+  min-width: 58px;
+  min-height: 58px;
+  padding: 12px;
+  box-shadow: 0 0 12px var(--ember-cyan-glow);
+  transition: color 200ms ease,
+              box-shadow 200ms ease,
+              background-color 200ms ease;
+}
+
+button.flat.circular.large:hover {
+  color: var(--ember-white);
+  background-color: var(--ember-cyan-dim);
+  box-shadow: 0 0 24px var(--ember-cyan-glow),
+              0 0 48px rgba(0, 255, 255, 0.1);
+}
+
+/* Grey SVG/Symbolic playback control buttons */
+.ember-control-button {
+  color: #888888;
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 8px 12px;
+  transition: opacity 200ms ease, color 200ms ease;
+  opacity: 0.7;
+}
+
+.ember-control-button:hover {
+  opacity: 1.0;
+  color: #cccccc;
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.ember-control-button:checked,
+.ember-control-button:active {
+  opacity: 1.0;
+  color: var(--ember-cyan);
+}
+
+/* Mini queue header */
+.ember-queue-header {
+  font-family: "Audiowide", monospace;
+  font-size: 10px;
+  letter-spacing: 4px;
+  color: var(--ember-white-faint);
+}
+
+/* Search bar */
+searchbar {
+  background-color: var(--ember-surface);
+  border: none;
+  border-bottom: 1px solid var(--ember-border);
+}
+
+entry {
+  background-color: transparent;
+  color: var(--ember-white);
+  border: none;
+  border-bottom: 1px solid var(--ember-border);
+  border-radius: 0;
+  font-family: "Audiowide", monospace;
+  font-size: 13px;
+  caret-color: var(--ember-cyan);
+}
+
+entry:focus {
+  border-bottom-color: var(--ember-cyan);
+  box-shadow: none;
+}
+
+/* Action bar (selection mode) */
+actionbar {
+  background-color: var(--ember-surface);
+  border-top: 1px solid var(--ember-border);
+}
+
+/* Scrollbars — very minimal */
+scrollbar {
+  background-color: transparent;
+}
+
+scrollbar slider {
+  background-color: var(--ember-border-hi);
+  border-radius: 0;
+  min-width: 3px;
+}
+
+scrollbar slider:hover {
+  background-color: var(--ember-white-faint);
+}
+
+/* Progress bar (loading) */
+progressbar > trough > progress {
+  background-color: var(--ember-cyan);
+}
+
+/* Selection mode checkbox */
+checkbutton.selection-mode check {
+  background-color: transparent;
+  border: 1px solid var(--ember-border-hi);
+  border-radius: 0;
+  color: var(--ember-cyan);
+}
+
+checkbutton.selection-mode:checked check {
+  background-color: var(--ember-cyan);
+  color: var(--ember-black);
+}
+
+/* Drag overlay */
+.drag-overlay-label {
+  font-family: "Audiowide", monospace;
+  font-size: 18px;
+  letter-spacing: 4px;
+  color: var(--ember-cyan);
+}
+
+/* ── Upcoming List ────────────────────────────────────────── */
+.ember-upcoming-box {
+  background-color: transparent;
+  padding: 0;
+}
+
+.ember-upcoming-row {
+  background-color: var(--ember-surface);
+  border: 1px solid var(--ember-border);
+  padding: 10px 16px;
+  border-radius: 0;
+  transition: border-color 200ms ease, background-color 200ms ease;
+  margin-bottom: 8px;
+}
+
+.ember-upcoming-row:hover {
+  background-color: var(--ember-surface-2);
+  border-color: var(--ember-cyan-dim);
+}
+
+.ember-upcoming-cover {
+  border-radius: 0;
+  border: 1px solid var(--ember-border-hi);
+}
+
+.ember-upcoming-title {
+  font-family: "Audiowide", monospace;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ember-white);
+}
+
+.ember-upcoming-artist {
+  font-family: "Audiowide", monospace;
+  font-size: 11px;
+  color: var(--ember-white-dim);
+}
+
+.ember-upcoming-duration {
+  font-family: "Audiowide", monospace;
+  font-size: 11px;
+  color: var(--ember-white-faint);
+}
+
+/* Fade overlays for the scrollable queue */
+.top-fade-overlay {
+  background-image: linear-gradient(to bottom, #000000, transparent);
+  background-color: transparent;
+}
+
+.bottom-fade-overlay {
+  background-image: linear-gradient(to top, #000000, transparent);
+  background-color: transparent;
+}
+
+/* ── Lyrics (Spotify-style, luxury feel) ─────────────────────── */
+
+/* The scrolled container itself gets a glassmorphism backdrop */
+.lyrics-scroll-container {
+  background: transparent;
+}
+
+.lyric-line {
+  font-family: "Audiowide", sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--ember-white);
+  opacity: 0.32;
+  padding: 12px 32px;
+  letter-spacing: 1px;
+}
+
+.lyric-line:hover {
+  opacity: 0.65;
+}
+
+.near-active-lyric {
+  opacity: 0.55;
+  font-size: 28px;
+}
+
+.active-lyric {
+  font-size: 32px;
+  color: var(--ember-cyan);
+  opacity: 1.0;
+  text-shadow: 0 0 20px var(--ember-cyan-glow),
+               0 0 40px rgba(0, 255, 255, 0.08);
+  letter-spacing: 2px;
+}
+
+.active-lyric:hover {
+  opacity: 1.0;
+}
+
+/* Hover label — elegant floating song name under vinyl */
+.ember-hover-label {
+  font-family: "Audiowide", monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--ember-cyan);
+  opacity: 0.9;
+  text-transform: uppercase;
+}
+
+/* Progress Bar styling */
+progressbar.ember-progress-bar {
+  min-height: 20px;
+  padding: 8px 0;
+}
+
+progressbar.ember-progress-bar trough {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  min-height: 3px;
+}
+
+progressbar.ember-progress-bar progress {
+  background-color: var(--ember-cyan);
+  border-radius: 2px;
+  min-height: 3px;
+  box-shadow: 0 0 8px var(--ember-cyan-glow);
+}
+

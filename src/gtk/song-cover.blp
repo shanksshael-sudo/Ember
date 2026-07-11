@@ -1,0 +1,32 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-FileCopyrightText: 2025 Emmanuele Bassi
+
+using Gtk 4.0;
+
+template $AmberolSongCover : Widget {
+  Box {
+    halign: center;
+    valign: center;
+
+    Stack cover_stack {
+      StackPage {
+        name: "no-image";
+
+        child: Image {
+          overflow: hidden;
+          icon-name: "folder-music-symbolic";
+          pixel-size: 160;
+          styles ["ember-vinyl-placeholder"]
+        };
+      }
+
+      StackPage {
+        name: "cover-image";
+
+        child: $AmberolCoverPicture album_image {
+          styles ["ember-vinyl-cover"]
+        };
+      }
+    }
+  }
+}

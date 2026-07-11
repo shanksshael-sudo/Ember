@@ -1,0 +1,245 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+using Gtk 4.0;
+
+template $AmberolWindow : Gtk.ApplicationWindow {
+  decorated: false;
+  width-request: 1024;
+  height-request: 700;
+
+  $DragOverlay drag_overlay {
+    title: _("Drop files to add to the archive");
+
+    child: Stack main_stack {
+      transition-type: crossfade;
+      transition-duration: 300;
+      hexpand: true;
+      vexpand: true;
+
+      // ─── STATE 1: EMPTY / INITIAL ──────────────────────────────────────
+      StackPage {
+        name: "initial-view";
+
+        child: Box {
+          orientation: vertical;
+          halign: center;
+          valign: center;
+          spacing: 40;
+
+          Label {
+            label: "EMBER";
+            styles ["ember-logotype"]
+          }
+
+          Label {
+            label: "your music, archived.";
+            styles ["ember-tagline"]
+          }
+
+          Box {
+            orientation: vertical;
+            halign: center;
+            spacing: 12;
+
+            Button restore_playlist_button {
+              label: _("Restore Archive");
+              action-name: "queue.restore-playlist";
+              visible: false;
+              styles ["ember-button-primary"]
+            }
+
+            Button add_folder_button {
+              label: _("Open Folder");
+              action-name: "queue.add-folder";
+              styles ["ember-button-primary"]
+            }
+
+            Button {
+              label: _("Open Files");
+              action-name: "queue.add-song";
+              styles ["ember-button-secondary"]
+            }
+          }
+        };
+      }
+
+      // ─── STATE 2: ARCHIVE VIEW ─────────────────────────────────────────
+      StackPage {
+        name: "archive-view";
+
+        child: Box {
+          orientation: vertical;
+          hexpand: true;
+          vexpand: true;
+
+          // Top Nav Bar in Archive View
+          CenterBox {
+            margin-top: 28;
+            margin-start: 32;
+            margin-end: 32;
+            margin-bottom: 12;
+
+            [end]
+            Button {
+              action-name: "win.show-main-menu";
+              styles ["ember-nav-button"]
+
+              Box {
+                spacing: 6;
+                Label { label: "←"; }
+                Label { label: _("MENU"); }
+              }
+            }
+          }
+
+          $EmberArchiveView archive_view {
+            hexpand: true;
+            vexpand: true;
+          }
+
+          $AmberolPlaylistView playlist_view {
+            visible: false;
+          }
+        };
+      }
+
+      // ─── STATE 3: NOW PLAYING ──────────────────────────────────────────
+      StackPage {
+        name: "now-playing-view";
+
+        child: Box {
+          orientation: vertical;
+          hexpand: true;
+          vexpand: true;
+          styles ["ember-now-playing-page"]
+
+          // ── Top Nav Bar ────────────────────────────────────────────────
+          CenterBox {
+            margin-top: 28;
+            margin-start: 32;
+            margin-end: 32;
+            margin-bottom: 0;
+
+            [end]
+            Button {
+              action-name: "win.show-archive";
+              styles ["ember-nav-button"]
+
+              Box {
+                spacing: 6;
+                Label { label: _("ARCHIVE"); }
+                Label { label: "→"; }
+              }
+            }
+          }
+
+          // ── Main Content ───────────────────────────────────────────────
+          Box {
+            orientation: horizontal;
+            hexpand: true;
+            vexpand: true;
+            margin-top: 12;
+            margin-start: 0;
+            margin-end: 48;
+            margin-bottom: 0;
+            spacing: 40;
+
+            // Left: Vinyl view box (Column 1) — fills full height, vinyl centered, label at bottom
+            Box {
+              orientation: vertical;
+              halign: start;
+              valign: fill;
+              vexpand: true;
+              spacing: 0;
+              width-request: 270;
+              overflow: visible;
+
+              $EmberVinylView vinyl_view {
+                width-request: 400;
+                height-request: 460;
+                styles ["ember-vinyl-shifted"]
+                valign: center;
+                vexpand: true;
+              }
+
+              // Hover label — sits right beneath the vinyl disc at the bottom of the column
+              Label hover_label {
+                label: "";
+                styles ["ember-hover-label"]
+                wrap: true;
+                justify: left;
+                halign: start;
+                hexpand: false;
+                max-width-chars: 24;
+                ellipsize: end;
+                margin-start: 12;
+                margin-bottom: 7;
+                valign: end;
+                height-request: 48;
+              }
+            }
+
+            // Right: Lyrics + Playbar (Column 2)
+            Box {
+              orientation: vertical;
+              valign: fill;
+              vexpand: true;
+              hexpand: true;
+              spacing: 0;
+
+              // Lyrics — centered, fills available vertical space
+              $AmberolLyricsView lyrics_view {
+                hexpand: true;
+                vexpand: true;
+              }
+
+              // ── Playbar section ──────────────────────────────────────
+              Box {
+                orientation: vertical;
+                hexpand: true;
+                spacing: 0;
+                margin-bottom: 40;
+                height-request: 175;
+                valign: end;
+
+                // Progress bar row
+                Box {
+                  orientation: horizontal;
+                  spacing: 16;
+                  margin-top: 24;
+                  margin-bottom: 0;
+                  hexpand: true;
+
+                  ProgressBar position_progress {
+                    hexpand: true;
+                    valign: center;
+                    styles ["ember-progress-bar"]
+                  }
+
+                  Label remaining_label {
+                    label: "0:00";
+                    styles ["ember-time-label"]
+                    valign: center;
+                  }
+                }
+
+                // Title + Artist — bigger spacing
+                $AmberolSongDetails song_details {
+                  halign: start;
+                  margin-top: 20;
+                  margin-bottom: 28;
+                  styles ["ember-song-details"]
+                }
+
+                // Playback controls
+                $AmberolPlaybackControl playback_control {
+                  halign: start;
+                }
+              }
+            }
+          }
+        };
+      }
+    };
+  }
+}
