@@ -18,7 +18,17 @@
 
 ## Screenshots
 
-![Full UI](./data/screenshots/amberol-full.png)
+### 🖥️ Main Menu (Start Screen)
+![Main Menu](./data/screenshots/main-menu.png)
+
+### 📂 Archive View (Horizontal Carousel)
+![Archive View](./data/screenshots/archive-view.png)
+
+### 📀 Album Focus (Vinyl Pop-out)
+![Album Focus](./data/screenshots/archive-preview.png)
+
+### 🎵 Now Playing & Synced Lyrics
+![Now Playing](./data/screenshots/now-playing-lyrics.png)
 
 ## Building from Source
 
@@ -75,4 +85,4 @@ See the [Windows Port Guide](./windows_port_guide.md) for details on building on
 Ember is released under the terms of the **GNU General Public License v3.0 or later**.
 
 Original Amberol codebase © 2022 Emmanuele Bassi.
-Modifications and new features © 2026 Shashwat (shanks).
+Modifications and new features © 2026 Shashank (shanks).
