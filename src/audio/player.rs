@@ -15,10 +15,12 @@ use log::{debug, error};
 use crate::{
     application::ApplicationAction,
     audio::{
-        Controller, CoverCache, GstBackend, InhibitController, MprisController, PlayerState, Queue,
+        Controller, CoverCache, GstBackend, InhibitController, PlayerState, Queue,
         Song, WaveformGenerator,
     },
 };
+#[cfg(any(target_os = "linux", target_os = "freebsd"))]
+use crate::audio::MprisController;
 
 #[derive(Clone, Debug)]
 pub enum PlaybackAction {
@@ -131,8 +133,11 @@ impl AudioPlayer {
 
         let mut controllers: Vec<Box<dyn Controller>> = Vec::new();
 
-        let mpris_controller = MprisController::new(sender.clone());
-        controllers.push(Box::new(mpris_controller));
+        #[cfg(any(target_os = "linux", target_os = "freebsd"))]
+        {
+            let mpris_controller = MprisController::new(sender.clone());
+            controllers.push(Box::new(mpris_controller));
+        }
 
         let inhibit_controller = InhibitController::new();
         controllers.push(Box::new(inhibit_controller));
@@ -451,6 +456,12 @@ impl AudioPlayer {
     pub fn seek_position_abs(&self, position: u64) {
         let pos = u64::min(position, self.state.duration());
         self.backend.seek_position(pos);
+    }
+
+    pub fn seek_position_abs_ms(&self, position_ms: u64) {
+        let max_ms = self.state.duration() * 1000;
+        let pos_ms = u64::min(position_ms, max_ms);
+        self.backend.seek_position_ms(pos_ms);
     }
 
     pub fn queue(&self) -> &Queue {

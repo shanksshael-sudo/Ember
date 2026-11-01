@@ -7,6 +7,19 @@
 /* ── Font imports (via @import not available in GTK CSS; fonts
       must be installed system-wide: Audiowide and Inter)       */
 
+/* ── Adwaita Theme Palette Overrides ───────────────────────── */
+@define-color window_bg_color #000000;
+@define-color window_fg_color #00ffff;
+@define-color headerbar_bg_color #000000;
+@define-color headerbar_fg_color #00ffff;
+@define-color headerbar_backdrop_color #000000;
+@define-color view_bg_color #000000;
+@define-color view_fg_color #00ffff;
+@define-color card_bg_color #0a0a0a;
+@define-color card_fg_color #ffffff;
+@define-color popover_bg_color #0a0a0a;
+@define-color popover_fg_color #ffffff;
+
 /* ── CSS Variables ─────────────────────────────────────────── */
 :root {
   --ember-black:       #000000;
@@ -31,25 +44,233 @@
 
 window,
 window.background,
+window.csd,
 .background {
-  background-color: var(--ember-black);
+  background-color: #000000;
   color: var(--ember-cyan);
   background-image: none;
+  border: 1px solid rgba(0, 240, 255, 0.25);
   border-radius: 0;
+  box-shadow: none;
+  margin: 0;
+  padding: 0;
+}
+
+window.maximized,
+window.fullscreen,
+window.csd.maximized,
+window.csd.fullscreen {
+  border: none;
+  box-shadow: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── HeaderBar & Window Controls ────────────────────────────── */
+headerbar,
+.titlebar,
+.ember-headerbar,
+window headerbar,
+window.csd headerbar,
+window headerbar:backdrop,
+window.csd headerbar:backdrop,
+headerbar windowhandle,
+window.csd headerbar windowhandle,
+headerbar.titlebar,
+headerbar:backdrop,
+.titlebar:backdrop,
+.ember-headerbar:backdrop {
+  min-height: 38px;
+  padding: 0;
+  padding-left: 14px;
+  margin: 0;
+  background: #000000;
+  background-color: #000000;
+  color: #00ffff;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: 1px solid rgba(0, 240, 255, 0.2);
   box-shadow: none;
 }
 
-/* Kill all AdwHeaderBar / title bars */
-headerbar,
-.titlebar,
-adw-header-bar,
-.top-bar {
-  min-height: 0;
+headerbar .title,
+.titlebar .title,
+.ember-headerbar .title,
+headerbar:backdrop .title,
+.titlebar:backdrop .title,
+.ember-headerbar:backdrop .title {
+  font-family: "Audiowide", monospace;
+  font-size: 13px;
+  font-weight: 400;
+  color: #00ffff;
+  letter-spacing: 3px;
+}
+
+/* ── Window Controls Container ─────────────────────────────── */
+headerbar windowcontrols,
+.titlebar windowcontrols,
+.ember-headerbar windowcontrols,
+window.csd headerbar windowcontrols {
   padding: 0;
   margin: 0;
+  border-spacing: 0;
   background: transparent;
+  background-color: transparent;
+}
+
+/* ── Window Control Buttons ─────────────────────────────────── */
+headerbar windowcontrols button,
+headerbar windowcontrols button.flat,
+headerbar windowcontrols button.circular,
+headerbar windowcontrols button.minimize,
+headerbar windowcontrols button.maximize,
+headerbar windowcontrols button.close,
+.titlebar windowcontrols button,
+.titlebar windowcontrols button.flat,
+.titlebar windowcontrols button.circular,
+.titlebar windowcontrols button.minimize,
+.titlebar windowcontrols button.maximize,
+.titlebar windowcontrols button.close,
+.ember-headerbar windowcontrols button,
+.ember-headerbar windowcontrols button.flat,
+.ember-headerbar windowcontrols button.circular,
+.ember-headerbar windowcontrols button.minimize,
+.ember-headerbar windowcontrols button.maximize,
+.ember-headerbar windowcontrols button.close,
+window.csd headerbar windowcontrols button {
+  min-width: 46px;
+  min-height: 38px;
+  padding: 0;
+  margin: 0;
   border: none;
+  border-style: none;
+  border-width: 0;
+  border-radius: 0;
+  background: transparent;
+  background-color: transparent;
+  background-image: none;
   box-shadow: none;
+  outline: none;
+  color: #00ffff;
+  transition: background-color 120ms ease-in-out, color 120ms ease-in-out;
+}
+
+/* ── Symbolic Icons inside Window Controls ──────────────────── */
+headerbar windowcontrols button image,
+headerbar windowcontrols button.flat image,
+headerbar windowcontrols button.circular image,
+headerbar windowcontrols button.minimize image,
+headerbar windowcontrols button.maximize image,
+headerbar windowcontrols button.close image,
+.titlebar windowcontrols button image,
+.ember-headerbar windowcontrols button image,
+window.csd headerbar windowcontrols button image {
+  min-width: 14px;
+  min-height: 14px;
+  padding: 0;
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  background-color: transparent;
+  background-image: none;
+  box-shadow: none;
+  color: #00ffff;
+  -gtk-icon-style: symbolic;
+}
+
+/* ── Hover States ───────────────────────────────────────────── */
+headerbar windowcontrols button:hover,
+headerbar windowcontrols button.flat:hover,
+headerbar windowcontrols button.circular:hover,
+headerbar windowcontrols button.minimize:hover,
+headerbar windowcontrols button.maximize:hover,
+.titlebar windowcontrols button:hover,
+.ember-headerbar windowcontrols button:hover,
+.ember-headerbar windowcontrols button.minimize:hover,
+.ember-headerbar windowcontrols button.maximize:hover,
+window.csd headerbar windowcontrols button:hover {
+  background: rgba(0, 240, 255, 0.15);
+  background-color: rgba(0, 240, 255, 0.15);
+  background-image: none;
+  border-radius: 0;
+  box-shadow: none;
+  color: #ffffff;
+}
+
+headerbar windowcontrols button:hover image,
+headerbar windowcontrols button.flat:hover image,
+headerbar windowcontrols button.circular:hover image,
+headerbar windowcontrols button.minimize:hover image,
+headerbar windowcontrols button.maximize:hover image,
+.titlebar windowcontrols button:hover image,
+.ember-headerbar windowcontrols button:hover image,
+window.csd headerbar windowcontrols button:hover image {
+  background: transparent;
+  background-color: transparent;
+  background-image: none;
+  border-radius: 0;
+  box-shadow: none;
+  color: #ffffff;
+}
+
+headerbar windowcontrols button.close:hover,
+.titlebar windowcontrols button.close:hover,
+.ember-headerbar windowcontrols button.close:hover,
+window.csd headerbar windowcontrols button.close:hover {
+  background: #e81123;
+  background-color: #e81123;
+  background-image: none;
+  border-radius: 0;
+  box-shadow: none;
+  color: #ffffff;
+}
+
+headerbar windowcontrols button.close:hover image,
+.titlebar windowcontrols button.close:hover image,
+.ember-headerbar windowcontrols button.close:hover image,
+window.csd headerbar windowcontrols button.close:hover image {
+  background: transparent;
+  background-color: transparent;
+  background-image: none;
+  border-radius: 0;
+  box-shadow: none;
+  color: #ffffff;
+}
+
+/* ── Active / Pressed States ────────────────────────────────── */
+headerbar windowcontrols button:active,
+headerbar windowcontrols button.minimize:active,
+headerbar windowcontrols button.maximize:active,
+.ember-headerbar windowcontrols button:active {
+  background: rgba(0, 240, 255, 0.3);
+  background-color: rgba(0, 240, 255, 0.3);
+  background-image: none;
+  color: #ffffff;
+}
+
+headerbar windowcontrols button.close:active,
+.ember-headerbar windowcontrols button.close:active {
+  background: #bf0f1d;
+  background-color: #bf0f1d;
+  background-image: none;
+  color: #ffffff;
+}
+
+/* ── Backdrop States ────────────────────────────────────────── */
+headerbar:backdrop windowcontrols button,
+.titlebar:backdrop windowcontrols button,
+.ember-headerbar:backdrop windowcontrols button,
+window.csd headerbar:backdrop windowcontrols button {
+  color: rgba(0, 240, 255, 0.7);
+}
+
+headerbar:backdrop windowcontrols button image,
+.titlebar:backdrop windowcontrols button image,
+.ember-headerbar:backdrop windowcontrols button image,
+window.csd headerbar:backdrop windowcontrols button image {
+  color: rgba(0, 240, 255, 0.7);
 }
 
 /* ── Typography utilities ──────────────────────────────────── */
@@ -108,7 +329,35 @@ adw-header-bar,
   color: var(--ember-white);
 }
 
-/* ── Nav buttons (ARCHIVE, icon buttons) ───────────────────── */
+/* ── Nav buttons (< and > arrow navigation buttons) ────────── */
+.ember-nav-arrow {
+  font-family: "Audiowide", monospace;
+  font-size: 16px;
+  font-weight: 700;
+  color: #00ffff;
+  background-color: transparent;
+  border: 1px solid rgba(0, 240, 255, 0.35);
+  border-radius: 2px;
+  min-width: 32px;
+  min-height: 28px;
+  padding: 2px 10px;
+  transition: all 150ms ease;
+  box-shadow: none;
+}
+
+.ember-nav-arrow:hover:not(:disabled) {
+  background-color: rgba(0, 240, 255, 0.15);
+  border-color: #00ffff;
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+  color: #ffffff;
+}
+
+.ember-nav-arrow:disabled {
+  color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.1);
+  opacity: 0.35;
+}
+
 .ember-nav-button {
   font-family: "Audiowide", monospace;
   font-size: 14px;
@@ -272,17 +521,17 @@ stack {
 
 .ember-np-title {
   font-family: "Audiowide", monospace;
-  font-size: 28px;
-  font-weight: 400;
-  color: var(--ember-white);
-  margin-bottom: 8px;
+  font-size: 24px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 2px;
 }
 
 .ember-np-artist {
   font-family: "Audiowide", monospace;
-  font-size: 18px;
-  font-weight: 300;
-  color: var(--ember-cyan);
+  font-size: 14px;
+  font-weight: 400;
+  color: #00ffff;
 }
 
 .ember-np-album {
@@ -298,8 +547,8 @@ stack {
 .ember-time-label {
   font-family: "Audiowide", monospace;
   font-size: 12px;
-  font-weight: 300;
-  color: var(--ember-white-faint);
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.4);
   letter-spacing: 1px;
 }
 
@@ -331,7 +580,9 @@ stack {
 }
 
 /* Playback control transport buttons */
-button.flat.circular {
+playback-control button.flat.circular,
+.playback-control button.flat.circular,
+.ember-playback-control button.flat.circular {
   background-color: transparent;
   color: var(--ember-white-dim);
   border: none;
@@ -343,13 +594,17 @@ button.flat.circular {
               background-color 200ms ease;
 }
 
-button.flat.circular:hover {
+playback-control button.flat.circular:hover,
+.playback-control button.flat.circular:hover,
+.ember-playback-control button.flat.circular:hover {
   color: var(--ember-white);
   background-color: var(--ember-surface);
 }
 
 /* Play/pause button — cyan ring border */
-button.flat.circular.large {
+playback-control button.flat.circular.large,
+.playback-control button.flat.circular.large,
+.ember-playback-control button.flat.circular.large {
   color: var(--ember-cyan);
   border: 2px solid var(--ember-cyan);
   min-width: 58px;
@@ -361,36 +616,136 @@ button.flat.circular.large {
               background-color 200ms ease;
 }
 
-button.flat.circular.large:hover {
+playback-control button.flat.circular.large:hover,
+.playback-control button.flat.circular.large:hover,
+.ember-playback-control button.flat.circular.large:hover {
   color: var(--ember-white);
   background-color: var(--ember-cyan-dim);
   box-shadow: 0 0 24px var(--ember-cyan-glow),
               0 0 48px rgba(0, 255, 255, 0.1);
 }
 
-/* Grey SVG/Symbolic playback control buttons */
+/* Playback control buttons */
 .ember-control-button {
-  color: #888888;
+  font-family: "Audiowide", monospace;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  color: rgba(255, 255, 255, 0.65);
   background-color: transparent;
   border: none;
   box-shadow: none;
-  padding: 8px 12px;
-  transition: opacity 200ms ease, color 200ms ease;
-  opacity: 0.7;
+  padding: 6px 8px;
+  transition: opacity 150ms ease, color 150ms ease;
+  opacity: 0.85;
 }
 
 .ember-control-button:hover {
   opacity: 1.0;
-  color: #cccccc;
+  color: #ffffff;
   background-color: transparent;
   border: none;
   box-shadow: none;
 }
 
 .ember-control-button:checked,
-.ember-control-button:active {
+.ember-control-button:active,
+.ember-control-button.active {
   opacity: 1.0;
-  color: var(--ember-cyan);
+  color: #00ffff;
+  background-color: transparent;
+}
+
+/* Maximized mode: Text labels for playback controls */
+playbackcontrol:not(.compact) .ember-control-button {
+  font-family: "Audiowide", monospace;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.85);
+  padding: 6px 14px;
+}
+
+playbackcontrol:not(.compact) .ember-control-button:hover {
+  color: #00ffff;
+  opacity: 1.0;
+}
+
+playbackcontrol:not(.compact) .ember-control-button.active,
+playbackcontrol:not(.compact) .ember-control-button:checked {
+  color: #00ffff;
+}
+
+playbackcontrol:not(.compact) #play_button,
+playbackcontrol:not(.compact) .ember-play-button {
+  color: #00ffff;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  padding: 6px 16px;
+}
+
+/* Compact mode: Grey SVG icons in minimize / unmaximized mode */
+playbackcontrol.compact .ember-control-button {
+  padding: 4px 6px;
+  min-width: 28px;
+  min-height: 28px;
+}
+
+playbackcontrol.compact .ember-control-button image {
+  color: #888888;
+  -gtk-icon-size: 16px;
+}
+
+playbackcontrol.compact .ember-control-button:hover image {
+  color: #ffffff;
+}
+
+playbackcontrol.compact .ember-control-button:checked image,
+playbackcontrol.compact .ember-control-button.active image {
+  color: #00ffff;
+}
+
+playbackcontrol.compact .ember-play-button image,
+playbackcontrol.compact #play_button image {
+  color: #888888;
+  -gtk-icon-size: 20px;
+}
+
+playbackcontrol.compact .ember-play-button:hover image,
+playbackcontrol.compact #play_button:hover image {
+  color: #00ffff;
+}
+
+.ember-play-button,
+#play_button {
+  color: #ffffff;
+  opacity: 1.0;
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.ember-play-button:hover,
+#play_button:hover {
+  color: #00ffff;
+  opacity: 1.0;
+  background-color: transparent;
+}
+
+.ember-play-button:active,
+#play_button:active {
+  color: #00ffff;
+  opacity: 0.8;
+}
+
+.ember-play-button image,
+#play_button image {
+  color: #ffffff;
+}
+
+.ember-play-button:hover image,
+#play_button:hover image {
+  color: #00ffff;
 }
 
 /* Mini queue header */
@@ -515,7 +870,7 @@ checkbutton.selection-mode:checked check {
   color: var(--ember-white-faint);
 }
 
-/* Fade overlays for the scrollable queue */
+/* Fade overlays for the scrollable queue & lyrics */
 .top-fade-overlay {
   background-image: linear-gradient(to bottom, #000000, transparent);
   background-color: transparent;
@@ -526,43 +881,87 @@ checkbutton.selection-mode:checked check {
   background-color: transparent;
 }
 
-/* ── Lyrics (Spotify-style, luxury feel) ─────────────────────── */
+/* ── Lyrics (Apple Music / Spotify cinematic luxury feel) ─────── */
 
-/* The scrolled container itself gets a glassmorphism backdrop */
+/* The scrolled container itself gets a pure seamless backdrop */
 .lyrics-scroll-container {
   background: transparent;
 }
 
+.lyric-block {
+  padding: 6px 16px;
+  border-radius: 8px;
+  transition: opacity 150ms ease;
+  margin-bottom: 8px;
+}
+
+.lyric-block:hover {
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
 .lyric-line {
-  font-family: "Audiowide", sans-serif;
+  font-family: "Inter", "Segoe UI", "SF Pro Display", sans-serif;
   font-size: 26px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.42);
+  letter-spacing: -0.3px;
+  line-height: 1.25;
+  transition: color 150ms ease, opacity 150ms ease;
+}
+
+.lyric-block:hover .lyric-line {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.lyric-sub-line {
+  font-family: "Inter", "Segoe UI", "SF Pro Display", sans-serif;
+  font-size: 18px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.32);
+  letter-spacing: -0.2px;
+  margin-top: 3px;
+  transition: color 150ms ease, opacity 150ms ease;
+}
+
+.lyric-block:hover .lyric-sub-line {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+/* Near-active lyric block (1 step away from active) */
+.lyric-block.near-active .lyric-line {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.lyric-block.near-active .lyric-sub-line {
+  color: rgba(255, 255, 255, 0.50);
+}
+
+/* Active lyric block: bold, crisp, glowing */
+.lyric-block.active {
+  background-color: transparent;
+}
+
+.lyric-block.active .lyric-line {
+  font-size: 30px;
   font-weight: 700;
-  color: var(--ember-white);
-  opacity: 0.32;
-  padding: 12px 32px;
-  letter-spacing: 1px;
-}
-
-.lyric-line:hover {
-  opacity: 0.65;
-}
-
-.near-active-lyric {
-  opacity: 0.55;
-  font-size: 28px;
-}
-
-.active-lyric {
-  font-size: 32px;
-  color: var(--ember-cyan);
+  color: #ffffff;
+  letter-spacing: -0.4px;
   opacity: 1.0;
-  text-shadow: 0 0 20px var(--ember-cyan-glow),
-               0 0 40px rgba(0, 255, 255, 0.08);
-  letter-spacing: 2px;
 }
 
-.active-lyric:hover {
-  opacity: 1.0;
+.lyric-block.active .lyric-sub-line {
+  font-size: 20px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.no-lyrics-label {
+  font-family: "Audiowide", monospace;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 4px;
+  color: rgba(255, 255, 255, 0.2);
+  padding: 24px 0;
 }
 
 /* Hover label — elegant floating song name under vinyl */
@@ -577,20 +976,20 @@ checkbutton.selection-mode:checked check {
 
 /* Progress Bar styling */
 progressbar.ember-progress-bar {
-  min-height: 20px;
-  padding: 8px 0;
+  min-height: 16px;
+  padding: 6px 0;
 }
 
 progressbar.ember-progress-bar trough {
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 2px;
-  min-height: 3px;
+  background-color: rgba(255, 255, 255, 0.15);
+  border-radius: 1px;
+  min-height: 2px;
 }
 
 progressbar.ember-progress-bar progress {
-  background-color: var(--ember-cyan);
-  border-radius: 2px;
+  background-color: #00ffff;
+  border-radius: 1px;
   min-height: 3px;
-  box-shadow: 0 0 8px var(--ember-cyan-glow);
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
 }
 

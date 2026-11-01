@@ -33,6 +33,7 @@ use crate::{
     utils,
 };
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum WindowMode {
     InitialView,
     ArchiveView,
@@ -98,6 +99,7 @@ mod imp {
         pub notify_nsongs_id: RefCell<Option<glib::SignalHandlerId>>,
         pub notify_current_id: RefCell<Option<glib::SignalHandlerId>>,
         pub notify_peaks_id: RefCell<Option<glib::SignalHandlerId>>,
+        pub seeking_until: Cell<i64>,
     }
 
     #[glib::object_subclass]
@@ -145,7 +147,15 @@ mod imp {
             });
             klass.install_action("win.show-main-menu", None, move |win, _, _| {
                 debug!("Window::win.show-main-menu");
-                win.switch_mode(WindowMode::InitialView);
+                if let Some(player) = win.player() {
+                    if player.queue().is_empty() {
+                        win.switch_mode(WindowMode::InitialView);
+                    } else {
+                        win.switch_mode(WindowMode::NowPlayingView);
+                    }
+                } else {
+                    win.switch_mode(WindowMode::InitialView);
+                }
             });
             klass.install_action("queue.repeat-mode", None, move |win, _, _| {
                 debug!("Window::queue.repeat()");
@@ -298,6 +308,7 @@ mod imp {
                 notify_nsongs_id: RefCell::new(None),
                 notify_current_id: RefCell::new(None),
                 notify_peaks_id: RefCell::new(None),
+                seeking_until: Cell::new(0),
             }
         }
     }
@@ -418,8 +429,29 @@ impl Window {
 
     fn restore_window_state(&self) {
         let settings = utils::settings_manager();
-        let width = settings.int("window-width");
-        let height = settings.int("window-height");
+        let mut width = settings.int("window-width");
+        let mut height = settings.int("window-height");
+
+        if width < 640 { width = 1024; }
+        if height < 480 { height = 680; }
+
+        if let Some(display) = gdk::Display::default() {
+            let monitors = display.monitors();
+            if let Some(monitor) = monitors.item(0).and_then(|m| m.downcast::<gdk::Monitor>().ok()) {
+                let geom = monitor.geometry();
+                let max_w = (geom.width() - 60).max(640);
+                let max_h = (geom.height() - 80).max(480);
+                width = width.min(max_w).min(1048);
+                height = height.min(max_h).min(700);
+            } else {
+                width = width.min(1048);
+                height = height.min(700);
+            }
+        } else {
+            width = width.min(1048);
+            height = height.min(700);
+        }
+
         self.set_default_size(width, height);
     }
 
@@ -657,11 +689,21 @@ impl Window {
             ) {
                 match info.file_type() {
                     gio::FileType::Regular => {
-                        if let Some(content_type) = info.content_type() {
-                            if gio::content_type_is_mime_type(&content_type, "audio/*") {
-                                debug!("Adding file '{}' to the queue", file.uri());
-                                queue.push(file);
-                            }
+                        let is_audio = if let Some(content_type) = info.content_type() {
+                            gio::content_type_is_mime_type(&content_type, "audio/*")
+                        } else {
+                            false
+                        } || {
+                            file.path().map_or(false, |p| {
+                                matches!(
+                                    p.extension().and_then(|e| e.to_str()).map(|s| s.to_ascii_lowercase()).as_deref(),
+                                    Some("mp3" | "flac" | "ogg" | "wav" | "m4a" | "aac" | "opus" | "wma")
+                                )
+                            })
+                        };
+                        if is_audio {
+                            debug!("Adding file '{}' to the queue", file.uri());
+                            queue.push(file);
                         }
                     }
                     gio::FileType::Directory => {
@@ -887,18 +929,189 @@ impl Window {
                         return glib::Propagation::Proceed;
                     }
                 }
-                let no_mod = modifier.is_empty();
-                let act = |name: &str| {
-                    use gtk::prelude::ActionGroupExt;
-                    ActionGroupExt::activate_action(&win, name, None);
-                };
-                match keyval.name().as_deref() {
-                    Some("space") if no_mod => { act("win.play"); }
-                    Some("Left")  if no_mod => { act("win.previous"); }
-                    Some("Right") if no_mod => { act("win.next"); }
-                    Some("comma") if no_mod => { act("win.seek-backwards"); }
-                    Some("period")if no_mod => { act("win.seek-forward"); }
-                    Some("a")     if no_mod => { act("win.show-archive"); }
+
+                // Mask off lock keys (CapsLock, NumLock, ScrollLock)
+                let clean_mods = modifier & (
+                    gdk::ModifierType::CONTROL_MASK
+                    | gdk::ModifierType::SHIFT_MASK
+                    | gdk::ModifierType::ALT_MASK
+                    | gdk::ModifierType::SUPER_MASK
+                );
+                let no_mod = clean_mods.is_empty();
+                let ctrl_only = clean_mods == gdk::ModifierType::CONTROL_MASK;
+
+                match keyval {
+                    // Play / Pause toggle
+                    gdk::Key::space | gdk::Key::k | gdk::Key::K | gdk::Key::Return if no_mod => {
+                        if let Some(p) = win.player() {
+                            if p.state().playing() {
+                                p.pause();
+                            } else {
+                                p.play();
+                            }
+                        }
+                    }
+                    gdk::Key::AudioPlay | gdk::Key::AudioPause => {
+                        if let Some(p) = win.player() {
+                            if p.state().playing() {
+                                p.pause();
+                            } else {
+                                p.play();
+                            }
+                        }
+                    }
+
+                    // Seek backward 5s
+                    gdk::Key::Left | gdk::Key::j | gdk::Key::J | gdk::Key::h | gdk::Key::H | gdk::Key::comma if no_mod => {
+                        if let Some(p) = win.player() {
+                            p.seek_offset(-5);
+                        }
+                    }
+
+                    // Seek forward 5s
+                    gdk::Key::Right | gdk::Key::l | gdk::Key::L | gdk::Key::period if no_mod => {
+                        if let Some(p) = win.player() {
+                            p.seek_offset(5);
+                        }
+                    }
+
+                    // Previous song
+                    gdk::Key::Left if ctrl_only => {
+                        if let Some(p) = win.player() {
+                            p.skip_previous();
+                        }
+                    }
+                    gdk::Key::p | gdk::Key::P | gdk::Key::less if no_mod => {
+                        if let Some(p) = win.player() {
+                            p.skip_previous();
+                        }
+                    }
+                    gdk::Key::AudioPrev => {
+                        if let Some(p) = win.player() {
+                            p.skip_previous();
+                        }
+                    }
+
+                    // Next song
+                    gdk::Key::Right if ctrl_only => {
+                        if let Some(p) = win.player() {
+                            p.skip_next();
+                        }
+                    }
+                    gdk::Key::n | gdk::Key::N | gdk::Key::greater if no_mod => {
+                        if let Some(p) = win.player() {
+                            p.skip_next();
+                        }
+                    }
+                    gdk::Key::AudioNext => {
+                        if let Some(p) = win.player() {
+                            p.skip_next();
+                        }
+                    }
+
+                    // Stop
+                    gdk::Key::AudioStop => {
+                        if let Some(p) = win.player() {
+                            p.stop();
+                        }
+                    }
+
+                    // Volume control
+                    gdk::Key::Up if no_mod => {
+                        if let Some(p) = win.player() {
+                            let cur = p.state().volume();
+                            p.set_volume((cur + 0.05).min(1.0));
+                        }
+                    }
+                    gdk::Key::Down if no_mod => {
+                        if let Some(p) = win.player() {
+                            let cur = p.state().volume();
+                            p.set_volume((cur - 0.05).max(0.0));
+                        }
+                    }
+                    gdk::Key::AudioRaiseVolume => {
+                        if let Some(p) = win.player() {
+                            let cur = p.state().volume();
+                            p.set_volume((cur + 0.05).min(1.0));
+                        }
+                    }
+                    gdk::Key::AudioLowerVolume => {
+                        if let Some(p) = win.player() {
+                            let cur = p.state().volume();
+                            p.set_volume((cur - 0.05).max(0.0));
+                        }
+                    }
+                    gdk::Key::m | gdk::Key::M if no_mod => {
+                        if let Some(p) = win.player() {
+                            let cur = p.state().volume();
+                            if cur > 0.0 {
+                                p.set_volume(0.0);
+                            } else {
+                                p.set_volume(1.0);
+                            }
+                        }
+                    }
+                    gdk::Key::AudioMute => {
+                        if let Some(p) = win.player() {
+                            let cur = p.state().volume();
+                            if cur > 0.0 {
+                                p.set_volume(0.0);
+                            } else {
+                                p.set_volume(1.0);
+                            }
+                        }
+                    }
+
+                    // Shuffle toggle
+                    gdk::Key::s | gdk::Key::S if no_mod => {
+                        if let Some(p) = win.player() {
+                            let cur = p.queue().is_shuffled();
+                            win.set_playlist_shuffled(!cur);
+                        }
+                    }
+
+                    // Repeat mode toggle
+                    gdk::Key::r | gdk::Key::R if no_mod => {
+                        if let Some(p) = win.player() {
+                            let q = p.queue();
+                            let next = match q.repeat_mode() {
+                                RepeatMode::Consecutive => RepeatMode::RepeatAll,
+                                RepeatMode::RepeatAll => RepeatMode::RepeatOne,
+                                RepeatMode::RepeatOne => RepeatMode::Consecutive,
+                            };
+                            q.set_repeat_mode(next);
+                            win.set_repeat_mode(next);
+                        }
+                    }
+
+                    // Toggle archive view / now playing view
+                    gdk::Key::a | gdk::Key::A if no_mod => {
+                        let is_archive = win.imp().main_stack.visible_child_name().as_deref() == Some("archive-view");
+                        if is_archive {
+                            win.switch_mode(WindowMode::NowPlayingView);
+                        } else {
+                            win.switch_mode(WindowMode::ArchiveView);
+                        }
+                    }
+
+                    // Escape key: exit fullscreen, or back to now playing view
+                    gdk::Key::Escape if no_mod => {
+                        if win.is_fullscreen() {
+                            win.unfullscreen();
+                        } else if win.imp().main_stack.visible_child_name().as_deref() == Some("archive-view") {
+                            win.switch_mode(WindowMode::NowPlayingView);
+                        }
+                    }
+
+                    // Fullscreen
+                    gdk::Key::F11 if no_mod => {
+                        if win.is_fullscreen() {
+                            win.unfullscreen();
+                        } else {
+                            win.fullscreen();
+                        }
+                    }
+
                     _ => return glib::Propagation::Proceed,
                 }
                 glib::Propagation::Stop
@@ -928,14 +1141,52 @@ impl Window {
             }
         ));
 
+        imp.vinyl_view.connect_seek_preview(clone!(
+            #[weak(rename_to = win)]
+            self,
+            move |_, progress| {
+                win.imp().seeking_until.set(i64::MAX);
+                win.imp().position_progress.set_fraction(progress);
+                if let Some(player) = win.player() {
+                    let duration = player.state().duration() as f64;
+                    let elapsed = (progress * duration) as u64;
+                    win.set_song_time(Some(elapsed), None);
+                }
+            }
+        ));
+
         imp.vinyl_view.connect_seek(clone!(
             #[weak(rename_to = win)]
             self,
             move |_, progress| {
+                win.imp().seeking_until.set(glib::monotonic_time() + 600_000);
+                win.imp().position_progress.set_fraction(progress);
                 if let Some(player) = win.player() {
                     let duration = player.state().duration() as f64;
                     let target_pos = (progress * duration) as u64;
                     player.seek_position_abs(target_pos);
+                    let elapsed = target_pos;
+                    let remaining = (duration as u64).checked_sub(elapsed).unwrap_or_default();
+                    win.set_song_time(Some(elapsed), Some(remaining));
+                    win.imp().lyrics_view.update_position((progress * duration * 1000.0) as u64, player.state().playing());
+                }
+            }
+        ));
+
+        imp.lyrics_view.set_seek_callback(clone!(
+            #[weak(rename_to = win)]
+            self,
+            move |target_ms| {
+                win.imp().seeking_until.set(glib::monotonic_time() + 600_000);
+                if let Some(player) = win.player() {
+                    player.seek_position_abs_ms(target_ms);
+                    let duration = player.state().duration() as f64;
+                    let progress = if duration > 0.0 { (target_ms as f64 / (duration * 1000.0)).clamp(0.0, 1.0) } else { 0.0 };
+                    win.imp().position_progress.set_fraction(progress);
+                    let elapsed = target_ms / 1000;
+                    let remaining = (duration as u64).checked_sub(elapsed).unwrap_or_default();
+                    win.set_song_time(Some(elapsed), Some(remaining));
+                    win.imp().lyrics_view.update_position(target_ms, player.state().playing());
                 }
             }
         ));
@@ -964,39 +1215,34 @@ impl Window {
             }
         ));
 
-        // Make the progress bar seekable via click and drag
+        // Make the progress bar seekable via click and drag without audio churning or blinking
         {
             let progress_bar = imp.position_progress.get();
 
-            // Helper closure: seek to the fraction x/width of the bar
-            let seek_to_x = clone!(
-                #[weak(rename_to = win)]
-                self,
-                move |x: f64, bar_width: f64| {
-                    if bar_width <= 0.0 { return; }
-                    let fraction = (x / bar_width).clamp(0.0, 1.0);
-                    if let Some(player) = win.player() {
-                        player.seek_position_rel(fraction);
-                    }
-                }
-            );
-
-            // Click: seek on press
-            let click = gtk::GestureClick::new();
-            click.set_button(gdk::BUTTON_PRIMARY);
-            click.connect_pressed(clone!(
-                #[weak]
-                progress_bar,
-                move |_, _, x, _| {
-                    let w = progress_bar.width() as f64;
-                    seek_to_x(x, w);
-                }
-            ));
-            progress_bar.add_controller(click);
-
-            // Drag: update visually while dragging, perform the seek ONLY on release
+            // Drag handles both simple clicks (offset = 0) and dragged seeks
             let drag = gtk::GestureDrag::new();
             drag.set_button(gdk::BUTTON_PRIMARY);
+
+            drag.connect_drag_begin(clone!(
+                #[weak]
+                progress_bar,
+                #[weak(rename_to = win)]
+                self,
+                move |gesture, start_x, _| {
+                    gesture.set_state(gtk::EventSequenceState::Claimed);
+                    win.imp().seeking_until.set(i64::MAX);
+                    let w = progress_bar.width() as f64;
+                    if w > 0.0 {
+                        let fraction = (start_x / w).clamp(0.0, 1.0);
+                        progress_bar.set_fraction(fraction);
+                        if let Some(player) = win.player() {
+                            let duration = player.state().duration();
+                            let elapsed = (duration as f64 * fraction) as u64;
+                            win.set_song_time(Some(elapsed), None);
+                        }
+                    }
+                }
+            ));
             
             drag.connect_drag_update(clone!(
                 #[weak]
@@ -1004,6 +1250,8 @@ impl Window {
                 #[weak(rename_to = win)]
                 self,
                 move |gesture, dx, _| {
+                    gesture.set_state(gtk::EventSequenceState::Claimed);
+                    win.imp().seeking_until.set(i64::MAX);
                     if let Some((start_x, _)) = gesture.start_point() {
                         let x = (start_x + dx).max(0.0);
                         let w = progress_bar.width() as f64;
@@ -1011,7 +1259,7 @@ impl Window {
                             let fraction = (x / w).clamp(0.0, 1.0);
                             progress_bar.set_fraction(fraction);
 
-                            // Update elapsed time label visually during drag
+                            // Update elapsed time label visually during drag without touching audio backend
                             if let Some(player) = win.player() {
                                 let duration = player.state().duration();
                                 let elapsed = (duration as f64 * fraction) as u64;
@@ -1033,10 +1281,21 @@ impl Window {
                         let w = progress_bar.width() as f64;
                         if w > 0.0 {
                             let fraction = (x / w).clamp(0.0, 1.0);
+                            progress_bar.set_fraction(fraction);
+                            win.imp().seeking_until.set(glib::monotonic_time() + 600_000);
                             if let Some(player) = win.player() {
                                 player.seek_position_rel(fraction);
+                                let duration = player.state().duration();
+                                let elapsed = (duration as f64 * fraction) as u64;
+                                let remaining = duration.checked_sub(elapsed).unwrap_or_default();
+                                win.set_song_time(Some(elapsed), Some(remaining));
+                                win.imp().lyrics_view.update_position((duration as f64 * fraction * 1000.0) as u64, player.state().playing());
                             }
+                        } else {
+                            win.imp().seeking_until.set(0);
                         }
+                    } else {
+                        win.imp().seeking_until.set(0);
                     }
                 }
             ));
@@ -1149,16 +1408,31 @@ impl Window {
 
         self.connect_close_request(move |window| {
             debug!("Saving window state");
-            let width = window.default_size().0;
-            let height = window.default_size().1;
-
-            let settings = utils::settings_manager();
-            settings
-                .set_int("window-width", width)
-                .expect("Unable to store window-width");
-            settings
-                .set_int("window-height", height)
-                .expect("Unable to stop window-height");
+            if !window.is_maximized() && !window.is_fullscreen() {
+                let mut width = window.width();
+                let mut height = window.height();
+                if width >= 640 && height >= 480 {
+                    if let Some(display) = gdk::Display::default() {
+                        let monitors = display.monitors();
+                        if let Some(monitor) = monitors.item(0).and_then(|m| m.downcast::<gdk::Monitor>().ok()) {
+                            let geom = monitor.geometry();
+                            let max_w = (geom.width() - 60).max(640);
+                            let max_h = (geom.height() - 80).max(480);
+                            width = width.min(max_w).min(1048);
+                            height = height.min(max_h).min(700);
+                        } else {
+                            width = width.min(1048);
+                            height = height.min(700);
+                        }
+                    } else {
+                        width = width.min(1048);
+                        height = height.min(700);
+                    }
+                    let settings = utils::settings_manager();
+                    let _ = settings.set_int("window-width", width);
+                    let _ = settings.set_int("window-height", height);
+                }
+            }
 
             window.unbind_queue();
             window.unbind_state();
@@ -1167,14 +1441,22 @@ impl Window {
             glib::Propagation::Proceed
         });
 
-        self.imp()
-            .playlist_view
-            .playlist_searchbar()
-            .set_key_capture_widget(Some(self.upcast_ref::<gtk::Widget>()));
+
+        self.connect_maximized_notify(clone!(
+            #[weak(rename_to = win)]
+            self,
+            move |w| {
+                let is_max = w.is_maximized();
+                win.imp().playback_control.set_compact_mode(!is_max);
+            }
+        ));
     }
 
     // The initial state of the playback actions
     fn set_initial_state(&self) {
+        let is_max = self.is_maximized();
+        self.imp().playback_control.set_compact_mode(!is_max);
+
         if let Some(player) = self.player() {
             let queue = player.queue();
             self.action_set_enabled("win.play", !queue.is_empty());
@@ -1412,18 +1694,19 @@ impl Window {
     fn update_play_button(&self) {
         if let Some(player) = self.player() {
             let state = player.state();
-            let play_button = self.imp().playback_control.play_button();
             let playing = state.playing();
-            if playing {
-                play_button.set_icon_name("media-playback-pause-symbolic");
-            } else {
-                play_button.set_icon_name("media-playback-start-symbolic");
-            }
+            self.imp().playback_control.set_playing(playing);
             self.imp().vinyl_view.set_property("playing", playing);
+            if playing {
+                self.imp().lyrics_view.resume_autoscroll();
+            }
         }
     }
 
     fn update_position_labels(&self) {
+        if glib::monotonic_time() < self.imp().seeking_until.get() {
+            return;
+        }
         if let Some(player) = self.player() {
             let state = player.state();
             if state.current_song().is_some() {
@@ -1439,7 +1722,7 @@ impl Window {
                     0.0
                 };
                 self.set_song_position(position);
-                self.imp().lyrics_view.update_position(elapsed_ms);
+                self.imp().lyrics_view.update_position(elapsed_ms, state.playing());
             } else {
                 self.set_song_time(None, None);
                 self.set_song_position(0.0);
@@ -1459,6 +1742,9 @@ impl Window {
             if let Some(song) = state.current_song() {
                 let lyrics = crate::audio::Lyrics::from_song(&song);
                 self.imp().lyrics_view.set_lyrics(lyrics);
+                self.imp().lyrics_view.set_blurred_cover(song.blur_texture());
+            } else {
+                self.imp().lyrics_view.set_blurred_cover(None);
             }
         }
     }
@@ -1471,6 +1757,11 @@ impl Window {
                 vinyl_view.set_property("cover", Some(&cover));
             } else {
                 vinyl_view.set_property("cover", None::<&gdk::Texture>);
+            }
+            if let Some(song) = state.current_song() {
+                self.imp().lyrics_view.set_blurred_cover(song.blur_texture());
+            } else {
+                self.imp().lyrics_view.set_blurred_cover(None);
             }
         }
     }
@@ -1781,20 +2072,23 @@ impl Window {
     }
 
     pub fn set_song_time(&self, elapsed: Option<u64>, _remaining: Option<u64>) {
+        let label = self.imp().remaining_label.get();
         if let Some(elapsed) = elapsed {
             let formatted = utils::format_time(elapsed as i64);
-            // self.imp().elapsed_label.set_text(&formatted);
-            self.imp().remaining_label.set_text(&formatted);
-        } else {
-            // self.imp().elapsed_label.set_text("0:00");
-            self.imp().remaining_label.set_text("0:00");
+            if label.text() != formatted {
+                label.set_text(&formatted);
+            }
+        } else if label.text() != "0:00" {
+            label.set_text("0:00");
         }
     }
 
     pub fn set_song_position(&self, position: f64) {
         let imp = self.imp();
-        imp.vinyl_view.set_property("progress", position);
-        imp.position_progress.set_fraction(position);
+        let cur = imp.position_progress.fraction();
+        if (cur - position).abs() >= 0.001 {
+            imp.position_progress.set_fraction(position);
+        }
     }
 
     pub fn update_archive_songs(&self) {
@@ -1820,3 +2114,5 @@ impl Window {
         }
     }
 }
+
+

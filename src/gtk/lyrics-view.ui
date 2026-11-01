@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <template class="AmberolLyricsView" parent="GtkWidget">
+    <child>
+      <object class="GtkOverlay" id="overlay">
+        <property name="vexpand">true</property>
+        <property name="hexpand">true</property>
+        <child>
+          <object class="GtkScrolledWindow" id="scrolled_window">
+            <property name="hscrollbar-policy">never</property>
+            <property name="vscrollbar-policy">automatic</property>
+            <property name="kinetic-scrolling">true</property>
+            <property name="vexpand">true</property>
+            <property name="hexpand">true</property>
+            <property name="min-content-height">200</property>
+            <property name="min-content-width">100</property>
+            <property name="propagate-natural-height">false</property>
+            <property name="propagate-natural-width">false</property>
+            <style>
+              <class name="lyrics-scroll-container"/>
+            </style>
+            <property name="child">
+              <object class="GtkBox" id="lyrics_box">
+                <property name="orientation">vertical</property>
+                <property name="spacing">16</property>
+                <property name="halign">center</property>
+                <property name="hexpand">true</property>
+                <property name="margin-start">24</property>
+                <property name="margin-end">24</property>
+                <property name="margin-top">60</property>
+                <property name="margin-bottom">250</property>
+              </object>
+            </property>
+          </object>
+        </child>
+        <child type="overlay">
+          <object class="GtkBox">
+            <property name="valign">start</property>
+            <property name="height-request">80</property>
+            <property name="can-target">false</property>
+            <style>
+              <class name="top-fade-overlay"/>
+            </style>
+          </object>
+        </child>
+        <child type="overlay">
+          <object class="GtkBox">
+            <property name="valign">end</property>
+            <property name="height-request">80</property>
+            <property name="can-target">false</property>
+            <style>
+              <class name="bottom-fade-overlay"/>
+            </style>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

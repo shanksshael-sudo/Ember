@@ -17,7 +17,7 @@
     <file alias="open-menu-symbolic.svg">assets/icons/open-menu-symbolic.svg</file>
     <!-- Placeholder or unused icons. Remove if truly not used -->
     <file alias="media-playlist-consecutive-symbolic.svg">assets/icons/media-playlist-repeat-symbolic.svg</file>
-    <file alias="media-playback-pause-symbolic.svg">assets/icons/media-playback-start-symbolic.svg</file>
+    <file alias="media-playback-pause-symbolic.svg">assets/icons/media-playback-pause-symbolic.svg</file>
     <file alias="media-playlist-repeat-song-symbolic.svg">assets/icons/media-playlist-repeat-song-symbolic.svg</file>
   </gresource>
   <gresource prefix="/io/bassi/Amberol">

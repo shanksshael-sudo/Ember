@@ -28,3 +28,11 @@ Thumbs.db
 run_output.log
 refactor_output.md
 test_clone.rs
+run_log.txt
+top_right.png
+
+# Windows build & cache artifacts
+dist/
+LOCAL_APPDATA_FONTCONFIG_CACHE/
+data/amberol.gresource
+data/gschemas.compiled

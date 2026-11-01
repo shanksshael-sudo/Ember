@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <template class="AmberolPlaybackControl" parent="GtkWidget">
+    <child>
+      <object class="GtkBox" id="center_box">
+        <property name="orientation">horizontal</property>
+        <property name="halign">end</property>
+        <property name="valign">center</property>
+        <property name="spacing">16</property>
+        <child>
+          <object class="GtkToggleButton" id="shuffle_button">
+            <property name="action-name">queue.shuffle</property>
+            <property name="valign">center</property>
+            <style>
+              <class name="flat"/>
+              <class name="ember-control-button"/>
+            </style>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="previous_button">
+            <property name="action-name">win.previous</property>
+            <property name="valign">center</property>
+            <style>
+              <class name="flat"/>
+              <class name="ember-control-button"/>
+            </style>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="play_button">
+            <property name="action-name">win.play</property>
+            <property name="valign">center</property>
+            <style>
+              <class name="flat"/>
+              <class name="ember-control-button"/>
+              <class name="ember-play-button"/>
+            </style>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="next_button">
+            <property name="action-name">win.next</property>
+            <property name="valign">center</property>
+            <style>
+              <class name="flat"/>
+              <class name="ember-control-button"/>
+            </style>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="repeat_button">
+            <property name="action-name">queue.repeat-mode</property>
+            <property name="valign">center</property>
+            <style>
+              <class name="flat"/>
+              <class name="ember-control-button"/>
+            </style>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

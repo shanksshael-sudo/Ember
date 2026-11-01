@@ -75,6 +75,22 @@ impl SongData {
         None
     }
 
+    pub fn thumb_texture(&self) -> Option<&gdk::Texture> {
+        if let Some(cover) = &self.cover_art {
+            return cover.thumb_texture();
+        }
+
+        None
+    }
+
+    pub fn blur_texture(&self) -> Option<&gdk::Texture> {
+        if let Some(cover) = &self.cover_art {
+            return cover.blur_texture();
+        }
+
+        None
+    }
+
     pub fn cover_palette(&self) -> Option<&Vec<gdk::RGBA>> {
         if let Some(cover) = &self.cover_art {
             return Some(cover.palette());
@@ -98,7 +114,12 @@ impl SongData {
         let path = file.path().expect("Unable to find file");
 
         let (mime_type, _) = gio::content_type_guess(Some(&path), None);
-        if !mime_type.starts_with("audio") || mime_type.ends_with("x-mpegurl") {
+        let is_audio = mime_type.starts_with("audio")
+            || matches!(
+                path.extension().and_then(|e| e.to_str()).map(|s| s.to_ascii_lowercase()).as_deref(),
+                Some("mp3" | "flac" | "ogg" | "wav" | "m4a" | "aac" | "opus" | "wma")
+            );
+        if !is_audio || mime_type.ends_with("x-mpegurl") {
             return SongData::default();
         }
 
@@ -378,6 +399,14 @@ impl Song {
 
     pub fn cover_texture(&self) -> Option<gdk::Texture> {
         self.imp().data.borrow().cover_texture().cloned()
+    }
+
+    pub fn thumb_texture(&self) -> Option<gdk::Texture> {
+        self.imp().data.borrow().thumb_texture().cloned()
+    }
+
+    pub fn blur_texture(&self) -> Option<gdk::Texture> {
+        self.imp().data.borrow().blur_texture().cloned()
     }
 
     pub fn cover_color(&self) -> Option<gdk::RGBA> {

@@ -77,8 +77,18 @@ GSETTINGS_SCHEMA_DIR=./build/data ./build/src/amberol
 
 ## Windows Port
 
-A Windows-compatible version is available in the `../Ember_Winx64` sibling directory.
-See the [Windows Port Guide](./windows_port_guide.md) for details on building on Windows.
+Ember is fully ported to Windows (x86_64).
+You can build directly using PowerShell:
+```powershell
+.\build-windows.ps1
+```
+
+Or generate a standalone distribution package with bundled runtime DLLs:
+```powershell
+.\build-windows.ps1 -Bundle
+```
+
+See the [Windows Port Guide](./windows_port_guide.md) for setup requirements, toolchain options (MSYS2 UCRT64), and distribution details.
 
 ## License
 

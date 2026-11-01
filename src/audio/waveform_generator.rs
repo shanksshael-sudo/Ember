@@ -177,8 +177,8 @@ impl WaveformGenerator {
         }
 
         let song = match self.imp().song.borrow().as_ref() {
-            Some(s) => s.clone(),
-            None => {
+            Some(s) if !s.uri().is_empty() => s.clone(),
+            _ => {
                 self.imp().peaks.replace(None);
                 self.notify("has-peaks");
                 return;

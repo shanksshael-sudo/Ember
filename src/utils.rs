@@ -57,7 +57,7 @@ pub fn load_cover_texture(buffer: &glib::Bytes) -> Option<gdk_pixbuf::Pixbuf> {
 
         debug!("Cover size {width} x {height} (ratio: {ratio}), scaled: {w} x {h}");
 
-        pixbuf.scale_simple(w, h, gdk_pixbuf::InterpType::Nearest)
+        pixbuf.scale_simple(w, h, gdk_pixbuf::InterpType::Bilinear)
     } else {
         warn!("Unable to load cover art");
         None
@@ -174,28 +174,28 @@ fn load_files_from_folder_internal(
 }
 
 pub fn cmp_two_files(base: Option<&gio::File>, a: &gio::File, b: &gio::File) -> Ordering {
-    let parent_a = a.parent().unwrap();
-    let parent_b = b.parent().unwrap();
+    let parent_a = a.parent();
+    let parent_b = b.parent();
     let parent_basename_a = if let Some(base) = base {
-        if let Some(path) = base.relative_path(&parent_a) {
+        if let (Some(_pa), Some(path)) = (&parent_a, parent_a.as_ref().and_then(|p| base.relative_path(p))) {
             path
         } else {
-            parent_a.basename().unwrap()
+            parent_a.as_ref().and_then(|p| p.basename()).unwrap_or_default()
         }
     } else {
-        parent_a.basename().unwrap()
+        parent_a.as_ref().and_then(|p| p.basename()).unwrap_or_default()
     };
     let parent_basename_b = if let Some(base) = base {
-        if let Some(path) = base.relative_path(&parent_b) {
+        if let (Some(_pb), Some(path)) = (&parent_b, parent_b.as_ref().and_then(|p| base.relative_path(p))) {
             path
         } else {
-            parent_b.basename().unwrap()
+            parent_b.as_ref().and_then(|p| p.basename()).unwrap_or_default()
         }
     } else {
-        parent_b.basename().unwrap()
+        parent_b.as_ref().and_then(|p| p.basename()).unwrap_or_default()
     };
-    let basename_a = a.basename().unwrap();
-    let basename_b = b.basename().unwrap();
+    let basename_a = a.basename().unwrap_or_default();
+    let basename_b = b.basename().unwrap_or_default();
 
     let mut order = cmp_like_nautilus(
         &parent_basename_a.to_string_lossy(),

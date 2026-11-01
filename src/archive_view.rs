@@ -25,6 +25,7 @@ mod imp {
         pub opening_index: Cell<Option<i32>>,
 
         pub tick_id: RefCell<Option<gtk::TickCallbackId>>,
+        pub scroll_tick_id: RefCell<Option<gtk::TickCallbackId>>,
         pub last_mouse_pos: Cell<Option<(f64, f64)>>,
     }
 
@@ -43,7 +44,6 @@ mod imp {
         fn constructed(&self) {
             self.parent_constructed();
             self.obj().setup_controllers();
-            self.obj().start_animation_tick();
         }
 
         fn properties() -> &'static [ParamSpec] {
@@ -70,6 +70,7 @@ mod imp {
                     self.selected_index.set(idx);
                     if idx >= 0 {
                         self.target_offset.set(idx as f64);
+                        self.obj().start_animation_tick();
                     }
                     self.obj().queue_draw();
                 }
@@ -105,8 +106,11 @@ mod imp {
     }
 
     impl WidgetImpl for ArchiveView {
-        fn measure(&self, _orientation: gtk::Orientation, _for_size: i32) -> (i32, i32, i32, i32) {
-            (500, 800, -1, -1)
+        fn measure(&self, orientation: gtk::Orientation, _for_size: i32) -> (i32, i32, i32, i32) {
+            match orientation {
+                gtk::Orientation::Vertical => (320, 460, -1, -1),
+                _ => (320, 600, -1, -1),
+            }
         }
 
         fn snapshot(&self, snapshot: &gtk::Snapshot) {
@@ -202,15 +206,15 @@ mod imp {
                 // 2. Draw metallic grooves (concentric borders)
                 let border_width = [0.7f32; 4];
                 let border_color = [gdk::RGBA::new(1.0, 1.0, 1.0, 0.09); 4];
-                let mut gr = 28.0_f64;
-                while gr < r - 8.0 {
+                let mut gr = 32.0_f64;
+                while gr < r - 10.0 {
                     let rect = graphene::Rect::new(
                         (cx_d - gr) as f32, (cy_d - gr) as f32,
                         (gr * 2.0) as f32, (gr * 2.0) as f32,
                     );
                     let outline = gsk::RoundedRect::from_rect(rect, gr as f32);
                     snap.append_border(&outline, &border_width, &border_color);
-                    gr += 5.0;
+                    gr += 8.0;
                 }
 
                 // 3. Draw Center label background
@@ -236,13 +240,14 @@ mod imp {
 
                 // 5. Draw Cover art circular clip & scaled texture
                 let art_r = lab_r - 3.0;
-                if let Some(cover) = song.cover_texture() {
+                let disc_cover = song.thumb_texture().or_else(|| song.cover_texture());
+                if let Some(cover) = disc_cover {
                     let clip = graphene::Rect::new(
                         (cx_d - art_r) as f32, (cy_d - art_r) as f32,
                         (art_r * 2.0) as f32,  (art_r * 2.0) as f32,
                     );
                     snap.push_rounded_clip(&gsk::RoundedRect::from_rect(clip.clone(), art_r as f32));
-                    snap.append_scaled_texture(&cover, gsk::ScalingFilter::Linear, &clip);
+                    snap.append_scaled_texture(&cover, gsk::ScalingFilter::Nearest, &clip);
                     snap.pop();
                 }
 
@@ -290,8 +295,8 @@ mod imp {
 
                 // --- 2.1 Draw the reflection (upside down, faint, clipped to reflection bounds) ---
                 // Only draw reflections for sleeves if the archive is closed, or for the active selected sleeve itself.
-                // This saves rendering up to 10 invisible blurred reflections when the carousel is open.
-                let draw_reflection = !is_open || is_sel;
+                // Restrict reflections to visible center area (|si - scroll| <= 3.5) to keep Cairo at 60 FPS.
+                let draw_reflection = (!is_open || is_sel) && (si as f64 - scroll).abs() <= 3.5;
                 if draw_reflection {
                     let clip_rect = graphene::Rect::new(
                         (fx - f_size) as f32,
@@ -325,7 +330,8 @@ mod imp {
                         snapshot.translate(&graphene::Point::new(-sc_cx as f32, -(cy as f32)));
                     }
 
-                    if let Some(cover) = song.cover_texture() {
+                    let ref_cover = song.blur_texture().or_else(|| song.thumb_texture()).or_else(|| song.cover_texture());
+                    if let Some(cover) = ref_cover {
                         let rect = graphene::Rect::new(fx as f32, fy as f32, f_size as f32, f_size as f32);
                         snapshot.push_clip(&rect);
                         snapshot.append_scaled_texture(&cover, gtk::gsk::ScalingFilter::Linear, &rect);
@@ -373,7 +379,7 @@ mod imp {
                 if let Some(cover) = song.cover_texture() {
                     let rect = graphene::Rect::new(fx as f32, fy as f32, f_size as f32, f_size as f32);
                     snapshot.push_clip(&rect);
-                    snapshot.append_scaled_texture(&cover, gtk::gsk::ScalingFilter::Linear, &rect);
+                    snapshot.append_scaled_texture(&cover, gtk::gsk::ScalingFilter::Nearest, &rect);
                     snapshot.pop();
                 } else {
                     snapshot.append_color(
@@ -596,6 +602,7 @@ impl ArchiveView {
             (imp.target_offset.get() + delta * 0.35).clamp(0.0, n_songs - 1.0)
         };
         imp.target_offset.set(target);
+        self.start_animation_tick();
     }
 
     fn handle_click(&self, x: f64, y: f64) {
@@ -853,8 +860,13 @@ impl ArchiveView {
     }
 
     fn start_animation_tick(&self) {
+        let imp = self.imp();
+        if imp.scroll_tick_id.borrow().is_some() {
+            return;
+        }
+
         let last_frame_time = Cell::new(None);
-        self.add_tick_callback(clone!(
+        let tick_id = self.add_tick_callback(clone!(
             #[weak(rename_to = view)]
             self,
             #[upgrade_or]
@@ -870,7 +882,10 @@ impl ArchiveView {
 
                 let imp = view.imp();
                 let n_songs = imp.songs.borrow().len() as f64;
-                if n_songs == 0.0 { return glib::ControlFlow::Continue; }
+                if n_songs == 0.0 {
+                    imp.scroll_tick_id.replace(None);
+                    return glib::ControlFlow::Break;
+                }
 
                 let current = imp.scroll_offset.get();
                 let target  = imp.target_offset.get();
@@ -905,10 +920,16 @@ impl ArchiveView {
                     }
 
                     view.queue_draw();
+                    glib::ControlFlow::Continue
+                } else {
+                    imp.scroll_offset.set(target);
+                    imp.scroll_tick_id.replace(None);
+                    view.queue_draw();
+                    glib::ControlFlow::Break
                 }
-                glib::ControlFlow::Continue
             }
         ));
+        imp.scroll_tick_id.replace(Some(tick_id));
     }
 }
 

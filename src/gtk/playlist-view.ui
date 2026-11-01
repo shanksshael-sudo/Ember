@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <template class="AmberolPlaylistView" parent="GtkWidget">
+    <child>
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <property name="hexpand">true</property>
+        <property name="vexpand">true</property>
+        <style>
+          <class name="ember-archive-list-container"/>
+        </style>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">false</property>
+            <property name="orientation">horizontal</property>
+            <property name="margin-top">24</property>
+            <property name="margin-bottom">0</property>
+            <property name="margin-start">32</property>
+            <property name="margin-end">32</property>
+            <property name="spacing">12</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="label" translatable="yes">ARCHIVE</property>
+                <property name="hexpand">true</property>
+                <property name="halign">start</property>
+                <style>
+                  <class name="ember-archive-header"/>
+                </style>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel" id="queue_length_label">
+                <property name="halign">end</property>
+                <style>
+                  <class name="ember-queue-length"/>
+                </style>
+              </object>
+            </child>
+            <child>
+              <object class="GtkToggleButton" id="search_button">
+                <property name="icon-name">system-search-symbolic</property>
+                <property name="action-name">queue.search</property>
+                <property name="valign">center</property>
+                <property name="tooltip-text" translatable="yes">Search</property>
+                <style>
+                  <class name="ember-icon-button"/>
+                </style>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkSearchBar" id="playlist_searchbar">
+            <property name="margin-start">32</property>
+            <property name="margin-end">32</property>
+            <property name="margin-top">8</property>
+            <property name="child">
+              <object class="GtkSearchEntry" id="playlist_searchentry">
+                <property name="placeholder-text" translatable="yes">Search tracks…</property>
+                <property name="hexpand">true</property>
+              </object>
+            </property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkOverlay">
+            <property name="vexpand">true</property>
+            <child>
+              <object class="GtkScrolledWindow">
+                <property name="vexpand">true</property>
+                <property name="hscrollbar-policy">never</property>
+                <property name="vscrollbar-policy">automatic</property>
+                <property name="child">
+                  <object class="GtkListView" id="queue_view">
+                    <style>
+                      <class name="ember-archive-listview"/>
+                    </style>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child type="overlay">
+              <object class="GtkProgressBar" id="playlist_progress">
+                <property name="valign">start</property>
+                <property name="visible">false</property>
+                <style>
+                  <class name="ember-load-progress"/>
+                </style>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkActionBar" id="queue_actionbar">
+            <property name="revealed">false</property>
+            <child>
+              <object class="GtkButton" id="queue_select_all_button">
+                <property name="icon-name">edit-select-all-symbolic</property>
+              </object>
+            </child>
+            <child type="center">
+              <object class="GtkLabel" id="queue_selected_label">
+                <style>
+                  <class name="caption"/>
+                </style>
+              </object>
+            </child>
+            <child type="end">
+              <object class="GtkButton" id="queue_remove_button">
+                <property name="icon-name">app-remove-symbolic</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="back_button">
+            <property name="visible">false</property>
+            <property name="icon-name">go-previous-symbolic</property>
+            <property name="action-name">queue.toggle</property>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

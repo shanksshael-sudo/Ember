@@ -4,11 +4,12 @@
 use std::rc::Rc;
 
 use gtk::subclass::prelude::*;
+#[cfg(any(target_os = "linux", target_os = "freebsd"))]
 use ashpd::desktop::background::Background;
 use async_channel::Receiver;
 use glib::clone;
 use gtk::{gio, glib, prelude::*};
-use log::{debug, warn};
+use log::debug;
 
 use crate::{
     audio::AudioPlayer,
@@ -126,9 +127,14 @@ glib::wrapper! {
 
 impl Default for Application {
     fn default() -> Self {
+        #[cfg(target_os = "windows")]
+        let flags = gio::ApplicationFlags::HANDLES_OPEN | gio::ApplicationFlags::NON_UNIQUE;
+        #[cfg(not(target_os = "windows"))]
+        let flags = gio::ApplicationFlags::HANDLES_OPEN;
+
         glib::Object::builder::<Application>()
             .property("application-id", APPLICATION_ID)
-            .property("flags", gio::ApplicationFlags::HANDLES_OPEN)
+            .property("flags", flags)
             .property("resource-base-path", "/io/bassi/Amberol")
             .build()
     }
@@ -199,7 +205,6 @@ impl Application {
             window.upcast()
         };
 
-        #[cfg(any(target_os = "linux", target_os = "freebsd"))]
         self.request_background();
 
         window.present();
@@ -292,6 +297,15 @@ impl Application {
         }
     }
 
-    #[cfg(not(any(target_os = "linux", target_os = "freebsd")))]
+    #[cfg(target_os = "windows")]
+    fn request_background(&self) {
+        let background_play = self.imp().settings.boolean("background-play");
+        if background_play {
+            debug!("Acquiring application hold for background playback");
+            self.imp().background_hold.replace(Some(self.hold()));
+        }
+    }
+
+    #[cfg(not(any(target_os = "linux", target_os = "freebsd", target_os = "windows")))]
     fn request_background(&self) {}
 }

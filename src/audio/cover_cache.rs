@@ -17,6 +17,8 @@ use crate::utils;
 #[derive(Clone, Debug)]
 pub struct CoverArt {
     texture: gdk::Texture,
+    thumb_texture: Option<gdk::Texture>,
+    blur_texture: Option<gdk::Texture>,
     palette: Vec<gdk::RGBA>,
     cache: Option<PathBuf>,
 }
@@ -24,6 +26,14 @@ pub struct CoverArt {
 impl CoverArt {
     pub fn texture(&self) -> &gdk::Texture {
         self.texture.as_ref()
+    }
+
+    pub fn thumb_texture(&self) -> Option<&gdk::Texture> {
+        self.thumb_texture.as_ref()
+    }
+
+    pub fn blur_texture(&self) -> Option<&gdk::Texture> {
+        self.blur_texture.as_ref()
     }
 
     pub fn palette(&self) -> &Vec<gdk::RGBA> {
@@ -205,8 +215,20 @@ impl CoverCache {
 
                 // We want both texture and palette
                 if texture.is_some() && palette.is_some() {
+                    let thumb_pixbuf = cover_pixbuf.as_ref().and_then(|pb| {
+                        pb.scale_simple(280, 280, gdk_pixbuf::InterpType::Bilinear)
+                    });
+                    let thumb_texture = thumb_pixbuf.as_ref().map(gdk::Texture::for_pixbuf);
+
+                    let blur_pixbuf = cover_pixbuf.as_ref().and_then(|pb| {
+                        pb.scale_simple(40, 40, gdk_pixbuf::InterpType::Bilinear)
+                    });
+                    let blur_texture = blur_pixbuf.as_ref().map(gdk::Texture::for_pixbuf);
+
                     let res = CoverArt {
                         texture: texture.unwrap(),
+                        thumb_texture,
+                        blur_texture,
                         palette: palette.unwrap(),
                         cache: cache_path,
                     };

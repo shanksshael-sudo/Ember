@@ -142,7 +142,11 @@ impl GstBackend {
     }
 
     pub fn set_song_uri(&self, uri: Option<&str>) {
-        self.gst_player.set_uri(uri);
+        if let Some(uri) = uri {
+            self.gst_player.set_uri(Some(uri));
+        } else {
+            self.gst_player.stop();
+        }
     }
 
     pub fn seek(&self, position: u64, duration: u64, offset: u64, direction: SeekDirection) {
@@ -169,6 +173,10 @@ impl GstBackend {
 
     pub fn seek_position(&self, position: u64) {
         self.gst_player.seek(gst::ClockTime::from_seconds(position));
+    }
+
+    pub fn seek_position_ms(&self, position_ms: u64) {
+        self.gst_player.seek(gst::ClockTime::from_mseconds(position_ms));
     }
 
     pub fn seek_start(&self) {

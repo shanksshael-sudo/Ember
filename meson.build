@@ -61,11 +61,19 @@ if reuse.found()
   )
 endif
 
-gnome.post_install(
-  glib_compile_schemas: true,
-  gtk_update_icon_cache: true,
-  update_desktop_database: true,
-)
+if host_machine.system() != 'windows'
+  gnome.post_install(
+    glib_compile_schemas: true,
+    gtk_update_icon_cache: true,
+    update_desktop_database: true,
+  )
+else
+  gnome.post_install(
+    glib_compile_schemas: true,
+    gtk_update_icon_cache: false,
+    update_desktop_database: false,
+  )
+endif
 
 summary({
     'prefix': get_option('prefix'),

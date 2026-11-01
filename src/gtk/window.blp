@@ -3,9 +3,26 @@
 using Gtk 4.0;
 
 template $AmberolWindow : Gtk.ApplicationWindow {
-  decorated: false;
-  width-request: 1024;
-  height-request: 700;
+  title: "Ember";
+  decorated: true;
+  resizable: true;
+  default-width: 1024;
+  default-height: 700;
+  width-request: 640;
+  height-request: 480;
+
+  [titlebar]
+  HeaderBar headerbar {
+    show-title-buttons: true;
+    decoration-layout: ":minimize,maximize,close";
+    styles ["ember-headerbar"]
+
+    [title]
+    Label {
+      label: "EMBER";
+      styles ["title"]
+    }
+  }
 
   $DragOverlay drag_overlay {
     title: _("Drop files to add to the archive");

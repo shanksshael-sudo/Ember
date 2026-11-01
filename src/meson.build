@@ -27,9 +27,12 @@ config_rs = configure_file(
   configuration: conf
 )
 
+python3 = import('python').find_installation('python3')
+
 # Copy the config.rs output to the source directory.
 run_command(
-  'cp',
+  python3, '-c',
+  'import shutil, sys; shutil.copyfile(sys.argv[1], sys.argv[2])',
   meson.project_build_root() / 'src' / 'config.rs',
   meson.project_source_root() / 'src' / 'config.rs',
   check: true,
@@ -47,22 +50,25 @@ else
   message('Building in debug mode')
 endif
 
-cargo_env = [ 'CARGO_HOME=' + meson.project_build_root() / 'cargo-home' ]
+cargo_wrapper = meson.project_source_root() / 'build-aux' / 'cargo.py'
 
 cargo_release = custom_target(
   'cargo-build',
   build_by_default: true,
   build_always_stale: true,
-  output: meson.project_name(),
+  output: host_machine.system() == 'windows' ? '@0@.exe'.format(meson.project_name()) : meson.project_name(),
   console: true,
   install: true,
   install_dir: get_option('bindir'),
   command: [
-    'env',
-    cargo_env,
-    cargo, 'build',
+    python3,
+    cargo_wrapper,
+    cargo,
+    meson.project_build_root() / 'cargo-home',
+    meson.project_build_root() / 'src',
+    rust_target,
+    meson.project_name(),
+    '@OUTPUT@',
     cargo_options,
-    '&&',
-    'cp', 'src' / rust_target / meson.project_name(), '@OUTPUT@',
   ],
 )
