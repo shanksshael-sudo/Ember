@@ -106,9 +106,15 @@ Or generate a standalone distribution package with bundled runtime DLLs:
 
 See the [Windows Port Guide](./windows_port_guide.md) for setup requirements, toolchain options (MSYS2 UCRT64), and distribution details.
 
+## Contributors
+
+- **Shashank ([@shanksshael-sudo](https://github.com/shanksshael-sudo))** — Creator & Lead Developer
+- **Antigravity (Google DeepMind)** — AI Pair Programmer & Co-developer
+- **Emmanuele Bassi** — Original Amberol codebase author
+
 ## License
 
 Ember is released under the terms of the **GNU General Public License v3.0 or later**.
 
 Original Amberol codebase © 2022 Emmanuele Bassi.
-Modifications and new features © 2026 Shashank (shanks).
+Modifications and new features © 2026 Shashank (shanks) & Antigravity.

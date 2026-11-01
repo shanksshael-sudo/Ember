@@ -3,7 +3,11 @@
 
 [package]
 name = "amberol"
-authors = ["Emmanuele Bassi <ebassi@gnome.org>", "Shashwat <shanks>"]
+authors = [
+    "Shashank <shanksshael-sudo@github.com>",
+    "Antigravity <antigravity@deepmind.google>",
+    "Emmanuele Bassi <ebassi@gnome.org>",
+]
 version = "2026.7.0"
 edition = "2021"
 description = "Ember — a cinematic music player for Linux & Windows"

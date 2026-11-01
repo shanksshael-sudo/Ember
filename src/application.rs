@@ -245,11 +245,15 @@ impl Application {
         let window = self.active_window().unwrap();
         let dialog = gtk::AboutDialog::builder()
             .logo_icon_name(APPLICATION_ID)
-            .program_name("Amberol")
+            .program_name("Ember")
             .version(VERSION)
-            .authors(vec!["Emmanuele Bassi"])
-            .copyright("© 2022 Emmanuele Bassi")
-            .website("https://apps.gnome.org/Amberol/")
+            .authors(vec![
+                "Shashank (shanks)",
+                "Antigravity (Google DeepMind)",
+                "Emmanuele Bassi",
+            ])
+            .copyright("© 2026 Shashank, Antigravity. Original codebase © 2022 Emmanuele Bassi")
+            .website("https://github.com/shanksshael-sudo/Ember")
             .license_type(gtk::License::Gpl30)
             // Translators: Replace "translator-credits" with your names, one name per line
             .translator_credits(i18n("translator-credits"))
