@@ -2,9 +2,25 @@
 
 ![Ember Logo](./data/icons/hicolor/scalable/apps/io.bassi.Amberol.svg)
 
-**Ember** is a sleek, cinematic music player for Linux (GNOME) — built on top of the open-source Amberol codebase with a completely reimagined visual experience.
+[![GitHub Release](https://img.shields.io/github/v/release/shanksshael-sudo/Ember?color=00ffff&label=Latest%20Release)](https://github.com/shanksshael-sudo/Ember/releases/latest)
+[![Windows Download](https://img.shields.io/badge/Windows-Download%20.ZIP-00f0ff?logo=windows&logoColor=black)](https://github.com/shanksshael-sudo/Ember/releases/latest)
+
+**Ember** is a sleek, cinematic music player for Linux & Windows — built on top of the open-source Amberol codebase with a completely reimagined cyberpunk visual experience.
 
 > *"your music, archived."*
+
+---
+
+## 💾 Download Pre-compiled Release (Windows)
+
+No compilers, terminals, or installation required:
+
+1. Go to the **[Latest GitHub Release](https://github.com/shanksshael-sudo/Ember/releases/latest)**.
+2. Download **`Ember-v2026.7-Windows-x64.zip`**.
+3. Extract the `.zip` anywhere on your PC.
+4. Double-click **`Ember.exe`** (or `run_ember.bat`) to launch immediately!
+
+---
 
 ## Features
 
