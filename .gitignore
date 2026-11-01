@@ -33,6 +33,7 @@ top_right.png
 
 # Windows build & cache artifacts
 dist/
+*.zip
 LOCAL_APPDATA_FONTCONFIG_CACHE/
 data/amberol.gresource
 data/gschemas.compiled

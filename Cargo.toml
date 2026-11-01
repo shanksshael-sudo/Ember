@@ -6,9 +6,9 @@ name = "amberol"
 authors = ["Emmanuele Bassi <ebassi@gnome.org>", "Shashwat <shanks>"]
 version = "2026.7.0"
 edition = "2021"
-description = "Ember — a cinematic music player for Linux"
+description = "Ember — a cinematic music player for Linux & Windows"
 license = "GPL-3.0-or-later"
-repository = "https://github.com/shanks/Ember"
+repository = "https://github.com/shanksshael-sudo/Ember"
 
 [profile.release]
 opt-level = 3
